@@ -1,7 +1,6 @@
 import 'package:bike/controllers/check_access_controller.dart';
 import 'package:bike/controllers/main_controller.dart';
 import 'package:bike/controllers/map_controller.dart';
-import 'package:bike/langs/translation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';

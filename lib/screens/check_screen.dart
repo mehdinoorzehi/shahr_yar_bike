@@ -1,5 +1,6 @@
 import 'package:bike/app_routes.dart';
 import 'package:bike/controllers/check_access_controller.dart';
+import 'package:bike/controllers/install_web_app_controller.dart';
 import 'package:bike/widgets/animated_background.dart';
 import 'package:bike/widgets/button.dart';
 import 'package:flutter/material.dart';
@@ -168,7 +169,7 @@ class _CheckScreenState extends State<CheckScreen> {
 
                 ElevatedButton.icon(
                   onPressed: () {
-                    // InstallController.instance.showInstallPrompt();
+                    InstallController.instance.showInstallPrompt();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: appInstalled
