@@ -1,5 +1,5 @@
 import 'package:bike/app_routes.dart';
-import 'package:bike/screens/models.dart';
+import 'package:bike/models/models.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';

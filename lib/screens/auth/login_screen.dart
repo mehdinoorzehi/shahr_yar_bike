@@ -1,10 +1,12 @@
 import 'package:bike/app_routes.dart';
+import 'package:bike/widgets/animated_background.dart';
 import 'package:bike/widgets/button.dart';
 import 'package:bike/widgets/textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/get_navigation.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -14,31 +16,18 @@ class LoginScreen extends StatelessWidget {
     final ThemeData _theme = Theme.of(context);
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              _theme.colorScheme.primary,
-              _theme.colorScheme.secondary,
-              _theme.colorScheme.secondary,
-              _theme.colorScheme.secondary,
-              _theme.colorScheme.secondary,
-            ],
-          ),
-        ),
+      body: AnimatedBackground(
         child: Column(
           children: [
             Container(
               height: 200,
               alignment: Alignment.bottomRight,
-              padding: const EdgeInsets.only(bottom: 20, right: 15),
+              padding: const EdgeInsets.only(bottom: 15, right: 40, left: 40),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    'خوش آمدید !',
+                    'login_title'.tr,
                     textDirection: TextDirection.rtl,
                     style: TextStyle(
                       color: _theme.colorScheme.onPrimary,
@@ -52,11 +41,20 @@ class LoginScreen extends StatelessWidget {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.35),
+                    width: 1.2,
+                  ),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(50),
                     topRight: Radius.circular(50),
                   ),
-                  color: _theme.colorScheme.surface,
+                  color: const Color.fromARGB(
+                    255,
+                    204,
+                    202,
+                    202,
+                  ).withValues(alpha: 0.4),
                 ),
                 child: SingleChildScrollView(
                   child: Padding(
@@ -81,85 +79,92 @@ class _Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'شماره‌ات رو وارد کن تا سریع وارد بشی',
-          style: themeData.textTheme.titleSmall,
+        Center(
+          child: Text(
+            'login_description'.tr,
+            style: themeData.textTheme.titleSmall!.apply(
+              color: themeData.colorScheme.onPrimary,
+              fontSizeDelta: 1.1,
+            ),
+          ),
         ),
 
         const SizedBox(height: 24),
         MyTextFeild(
           keyboardType: TextInputType.phone,
-          suffoxIcon: const Icon(LucideIcons.phone),
-          hintText: '09',
+          suffoxIcon: Icon(
+            LucideIcons.phone,
+            color: themeData.colorScheme.onPrimary,
+          ),
+          hintTextDirection: TextDirection.ltr,
+          hintText: 'phone_placeholder'.tr,
           textDirection: TextDirection.ltr,
           maxLength: 11,
           onChanged: (value) {
             if (value.length == 11) {
-              FocusScope.of(context).nextFocus();
+              // FocusScope.of(context).nextFocus();
             }
           },
         ),
         const SizedBox(height: 80),
 
         MyButton(
-          buttonText: 'ورود',
+          buttonText: 'login_button'.tr,
+          isFocus: true,
           onTap: () {
-            Get.offNamed(AppRoutes.otp);
+            Get.toNamed(AppRoutes.otp);
           },
         ),
 
-        const SizedBox(height: 40),
+        const SizedBox(height: 70),
 
-        // 🔹 راهنمای ورود
-        TextButton.icon(
-          onPressed: () {
-            showModalBottomSheet(
-              showDragHandle: true,
+        // 🔹 دکمه راهنمای ورود موقتاً غیرفعال شد
+        // TextButton.icon(
+        //   onPressed: () { ... },
+        //   icon: Text("راهنمای ورود"),
+        //   label: Icon(LucideIcons.circle_question_mark),
+        // ),
 
-              context: context,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              builder: (context) => Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      "راهنمای ورود",
-                      style: themeData.textTheme.titleMedium!.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      "۱. راهنمای یک\n"
-                      "۲. راهنمای دو\n"
-                      "۳. راهنمای سه",
-                      textAlign: TextAlign.start,
-                      textDirection: TextDirection.rtl,
-                    ),
-                    const SizedBox(height: 16),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("تایید"),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-
-          icon: const Text("راهنمای ورود"),
-          label: const Icon(LucideIcons.circle_help, size: 20),
+        // ✅ نکات جذاب و راست‌چین پایین فرم
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildTip("۱. شماره باید با 09 شروع شود", themeData),
+            const SizedBox(height: 8),
+            buildTip("۲. شماره باید به نام خودتان باشد", themeData),
+            const SizedBox(height: 8),
+            buildTip("۳. امکان تغییر شماره موبایل وجود ندارد", themeData),
+          ],
         ),
       ],
     );
   }
+}
+
+Widget buildTip(String text, ThemeData themeData) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    // textDirection: TextDirection.rtl,
+    children: [
+      Icon(
+        LucideIcons.circle_check,
+        color: themeData.colorScheme.onPrimary.withValues(alpha: 0.85),
+        size: 18,
+      ),
+      const SizedBox(width: 6),
+      Flexible(
+        child: Text(
+          text,
+          textDirection: TextDirection.rtl,
+          style: themeData.textTheme.bodyMedium!.copyWith(
+            color: themeData.colorScheme.onPrimary.withValues(alpha: 0.85),
+            height: 1.5,
+            fontSize: 13.5,
+          ),
+        ),
+      ),
+    ],
+  );
 }

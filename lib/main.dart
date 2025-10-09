@@ -1,40 +1,33 @@
 import 'package:bike/app_routes.dart';
 import 'package:bike/conf/setup.dart';
-
+import 'package:bike/langs/app_translations.dart';
+import 'package:bike/langs/translation_service.dart';
 import 'package:bike/theme/mange_theme.dart';
 import 'package:bike/theme/theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:toastification/toastification.dart';
 
-class _CupertinoScrollBehavior extends MaterialScrollBehavior {
-  const _CupertinoScrollBehavior();
-
-  @override
-  ScrollPhysics getScrollPhysics(BuildContext context) {
-    return const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
-  }
-
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    PointerDeviceKind.stylus,
-    PointerDeviceKind.unknown,
-  };
-}
-
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await setUp();
-  runApp(const MyApp());
+
+  // مقداردهی اولیه TranslationService
+  final translationService = await Get.putAsync(
+    () => TranslationService().init(),
+  );
+
+  runApp(MyApp(translationService: translationService));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final TranslationService translationService;
+
+  const MyApp({super.key, required this.translationService});
 
   @override
   Widget build(BuildContext context) {
@@ -47,61 +40,72 @@ class MyApp extends StatelessWidget {
           return ToastificationWrapper(
             child: Sizer(
               builder: (context, orientation, deviceType) {
-                final app = Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: ScrollConfiguration(
-                    behavior: const _CupertinoScrollBehavior(),
-                    child: GetMaterialApp(
-                      debugShowCheckedModeBanner: false,
-                      theme: AppThemes.lightThemes[themeType],
-                      // darkTheme: AppThemes.darkThemes[themeType],
-                      themeMode: ThemeMode.light,
+                return Obx(() {
+                  // ✅ از Rx برای واکنش به تغییر زبان استفاده می‌کنیم
+                  final locale = translationService.currentLocale.value;
 
-                      defaultTransition: Transition.fadeIn,
-                      getPages: AppRoutes.pages,
-                      initialRoute: AppRoutes.splash,
-                      routingCallback: (routing) {
-                        // optional:
-                        if (routing != null) {
-                          if (kDebugMode) {
-                            print("Navigated to ${routing.current}");
-                          }
-                        }
-                      },
-                    ),
-                  ),
-                );
-
-                if (kIsWeb) {
-                  final borderRadius = BorderRadius.circular(30);
-                  return Center(
-                    child: Container(
-                      width: 500,
-                      // height: 700,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: borderRadius,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
-                            blurRadius: 40,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 16),
-                          ),
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
-                            blurRadius: 10,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(borderRadius: borderRadius, child: app),
-                    ),
+                  final app = GetMaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    translations: AppTranslations(),
+                    locale: translationService.currentLocale.value,
+                    key: ValueKey(locale.languageCode),
+                    fallbackLocale: const Locale('fa'),
+                    supportedLocales: const [
+                      Locale('fa'),
+                      Locale('en'),
+                      Locale('ar'),
+                    ],
+                    localizationsDelegates: const [
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
+                    theme: AppThemes.lightThemes[themeType],
+                    themeMode: ThemeMode.light,
+                    defaultTransition: Transition.fadeIn,
+                    getPages: AppRoutes.pages,
+                    initialRoute: AppRoutes.languageSelector,
+                    routingCallback: (routing) {
+                      if (routing != null && kDebugMode) {
+                        print("Navigated to ${routing.current}");
+                      }
+                    },
                   );
-                }
 
-                return app;
+                  final screenWidth = MediaQuery.of(context).size.width;
+                  const tabletBreakpoint = 600.0;
+
+                  if (screenWidth > tabletBreakpoint) {
+                    final borderRadius = BorderRadius.circular(30);
+                    return Center(
+                      child: Container(
+                        width: 500,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: borderRadius,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 40,
+                              offset: const Offset(0, 16),
+                            ),
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: borderRadius,
+                          child: app,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return app;
+                });
               },
             ),
           );

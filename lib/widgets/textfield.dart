@@ -41,7 +41,12 @@ class MyTextFeild extends StatelessWidget {
       maxLength: maxLength,
       textAlign: textAlign,
       textDirection: textDirection,
-      style: const TextStyle(fontFamily: '', fontSize: 18),
+      style: TextStyle(
+        fontFamily: '',
+        fontSize: 22,
+        fontWeight: FontWeight.bold,
+        color: Theme.of(context).colorScheme.onPrimary,
+      ),
       decoration: InputDecoration(
         // labelText: labelText,
         label: labelText != null
@@ -49,7 +54,7 @@ class MyTextFeild extends StatelessWidget {
                 alignment: Alignment.centerRight, // راست‌چین
                 child: Text(
                   labelText!,
-                  textDirection: TextDirection.rtl,
+                  // textDirection: TextDirection.rtl,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                     fontSize: 16,
@@ -60,6 +65,7 @@ class MyTextFeild extends StatelessWidget {
             : null,
         hintTextDirection: hintTextDirection,
         hintText: hintText,
+
         filled: true,
         fillColor: Theme.of(
           context,
@@ -67,17 +73,17 @@ class MyTextFeild extends StatelessWidget {
         hintStyle: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.5),
         ),
-        suffixIcon: suffoxIcon,
+        suffixIcon: prefixIcon,
         counterText: '',
-        prefixIcon: prefixIcon,
+        prefixIcon: suffoxIcon,
         prefixIconColor: Theme.of(context).colorScheme.primary,
         suffixIconColor: Theme.of(context).colorScheme.primary,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+            color: Theme.of(context).colorScheme.onPrimary,
           ), // رنگ حالت عادی
         ),
         focusedBorder: OutlineInputBorder(

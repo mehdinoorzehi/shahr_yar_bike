@@ -1,6 +1,6 @@
 import 'package:bike/app_routes.dart';
 import 'package:bike/controllers/main_controller.dart';
-import 'package:bike/screens/amar_screen.dart';
+import 'package:bike/screens/others/amar_screen.dart';
 import 'package:bike/screens/home_screen.dart';
 import 'package:bike/screens/map/map_screen.dart';
 import 'package:flutter/material.dart';
@@ -38,11 +38,12 @@ class MainScreen extends StatelessWidget {
         body: Obx(() {
           switch (controller.selectedIndex.value) {
             case 0:
-              return const AmarScreen(); // هر بار ساخته میشه
+              return const HomeScreen(); // هر بار ساخته میشه
             case 1:
               return _mapScreen; // همیشه همون یک instance
             case 2:
-              return const HomeScreen(); // هر بار ساخته میشه
+              return const AmarScreen(); // هر بار ساخته میشه
+
             default:
               return const HomeScreen();
           }
@@ -58,8 +59,8 @@ class MainScreen extends StatelessWidget {
           backgroundColor: theme.colorScheme.onPrimary,
           items: [
             BottomBarItem(
-              icon: const Icon(LucideIcons.chart_column),
-              title: const Text('آمار من'),
+              icon: const Icon(LucideIcons.house),
+              title: const Text('خانه'),
               selectedColor: theme.colorScheme.primary,
               borderColor: theme.colorScheme.primary,
             ),
@@ -70,8 +71,8 @@ class MainScreen extends StatelessWidget {
               borderColor: theme.colorScheme.primary,
             ),
             BottomBarItem(
-              icon: const Icon(LucideIcons.house),
-              title: const Text('خانه'),
+              icon: const Icon(LucideIcons.chart_column),
+              title: const Text('آمار من'),
               selectedColor: theme.colorScheme.primary,
               borderColor: theme.colorScheme.primary,
             ),

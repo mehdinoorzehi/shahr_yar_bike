@@ -47,36 +47,33 @@ class _MapScreenState extends State<MapScreen> {
               ),
               children: [
                 TileLayer(
-                  urlTemplate:
-                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.example.bikeshare',
                 ),
-    
+
                 /// فقط مارکرها reactive هستن
                 // داخل FlutterMap > children
                 Obx(() {
                   // ثبت وابستگی
                   final _ = controller.markers.length;
                   // پاس‌دادن snapshot تا MarkerLayer لیست stable بگیره
-                  final markersSnapshot = List<Marker>.from(
-                    controller.markers,
-                  );
+                  final markersSnapshot = List<Marker>.from(controller.markers);
                   return MarkerLayer(markers: markersSnapshot);
                 }),
               ],
             ),
           ),
-    
+
           /// اگر لوکیشن آماده نیست
           Obx(
-            () => controller.currentPosition.value == null
+            () => controller.isLoading.value == false
                 ? const LoadingGetLocationCard()
                 : const SizedBox.shrink(),
           ),
-    
+
           /// دکمه سرچ
           SearchButton(showSearchBox: controller.showSearchBox),
-    
+
           /// باکس سرچ
           Obx(
             () => controller.showSearchBox.value
@@ -92,7 +89,7 @@ class _MapScreenState extends State<MapScreen> {
                   )
                 : const SizedBox.shrink(),
           ),
-    
+
           /// آواتار
           const Positioned(top: 40, right: 16, child: DrawerAvatar()),
         ],

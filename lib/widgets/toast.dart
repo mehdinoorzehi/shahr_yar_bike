@@ -1,3 +1,4 @@
+import 'package:bike/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:toastification/toastification.dart';
@@ -7,7 +8,7 @@ import 'package:toastification/toastification.dart';
 //   await player.play(AssetSource('sounds/bing.mp3'));
 // }
 
-void showSuccsesToast({required String description}) {
+void showSuccessToast({required String description}) {
   // _playSound();
   toastification.show(
     type: ToastificationType.success,
@@ -27,7 +28,7 @@ void showSuccsesToast({required String description}) {
     ),
     alignment: Alignment.topRight,
     autoCloseDuration: const Duration(seconds: 5),
-    icon: const Icon(LucideIcons.circle_check),
+    icon: const Icon(LucideIcons.circle_check, color: kGreen),
     borderRadius: BorderRadius.circular(12.0),
     showProgressBar: true,
     dragToClose: true,
@@ -56,7 +57,7 @@ void showErrorToast({required String description}) {
     ),
     alignment: Alignment.topRight,
     autoCloseDuration: const Duration(seconds: 5),
-    icon: const Icon(LucideIcons.circle_x),
+    icon: const Icon(LucideIcons.circle_x, color: kRed),
     borderRadius: BorderRadius.circular(12.0),
     showProgressBar: true,
     dragToClose: true,
@@ -85,7 +86,7 @@ void showInfoToast({required String description}) {
     ),
     alignment: Alignment.topRight,
     autoCloseDuration: const Duration(seconds: 5),
-    icon: const Icon(LucideIcons.info),
+    icon: const Icon(LucideIcons.info, color: kBlue),
     borderRadius: BorderRadius.circular(12.0),
     showProgressBar: true,
     dragToClose: true,
@@ -114,7 +115,7 @@ void showWarningToast({required String description}) {
     ),
     alignment: Alignment.topRight,
     autoCloseDuration: const Duration(seconds: 5),
-    icon: const Icon(LucideIcons.circle_alert),
+    icon: const Icon(LucideIcons.circle_alert, color: kOrange),
     borderRadius: BorderRadius.circular(12.0),
     showProgressBar: true,
     dragToClose: true,

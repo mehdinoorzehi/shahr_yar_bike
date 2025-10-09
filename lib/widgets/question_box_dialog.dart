@@ -60,7 +60,6 @@ class QueastionBoxDialog extends StatelessWidget {
                           child: SizedBox(
                             height: 50,
                             child: MyButton(
-                              isFocus: false,
                               buttonText: 'خیر',
                               onTap: () {
                                 if (context.mounted) {

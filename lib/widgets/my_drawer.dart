@@ -76,7 +76,9 @@ class MyDrawer extends StatelessWidget {
                         context: context,
                         builder: (context) => QueastionBoxDialog(
                           title: 'آیا می خواهید از حساب خود خارج شوید؟',
-                          yesOnTap: () {},
+                          yesOnTap: () {
+                            Get.offAllNamed(AppRoutes.login);
+                          },
                         ),
                       );
                     },
@@ -149,7 +151,9 @@ class MyDrawer extends StatelessWidget {
                             context: context,
                             builder: (context) => QueastionBoxDialog(
                               title: 'آیا می خواهید از حساب خود خارج شوید؟',
-                              yesOnTap: () {},
+                              yesOnTap: () {
+                                Get.offAllNamed(AppRoutes.login);
+                              },
                             ),
                           ); // کد خروج از حساب
                         },
@@ -174,39 +178,34 @@ class MyDrawer extends StatelessWidget {
     required VoidCallback onTap,
     required BuildContext context,
   }) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: AnimatedTouch(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(15),
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(
-              color:
-                  color ??
-                  Theme.of(
-                    context,
-                  ).colorScheme.secondary.withValues(alpha: 0.3),
-            ),
+    return AnimatedTouch(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color:
+                color ??
+                Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
           ),
-          child: ListTile(
-            leading: Icon(
-              icon,
+        ),
+        child: ListTile(
+          leading: Icon(
+            icon,
+            color: color,
+            //?? Theme.of(context).colorScheme.primary,
+          ),
+          title: Text(
+            text,
+            textAlign: TextAlign.right,
+            style: TextStyle(
               color: color,
-              //?? Theme.of(context).colorScheme.primary,
+              // ?? Theme.of(context).colorScheme.primary,
             ),
-            title: Text(
-              text,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: color,
-                // ?? Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            onTap: onTap,
           ),
+          onTap: onTap,
         ),
       ),
     );

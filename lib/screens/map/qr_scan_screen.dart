@@ -35,7 +35,7 @@ class _QrScanScreenState extends State<QrScanScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-     
+
         elevation: 0,
         title: const Text("اسکن دوچرخه", style: TextStyle(color: Colors.white)),
         centerTitle: true,
@@ -102,7 +102,7 @@ class _QrScanScreenState extends State<QrScanScreen> {
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  // crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const Text(
                       "یا شماره پلاک دوچرخه را وارد کنید",

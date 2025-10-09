@@ -1,5 +1,5 @@
 import 'package:bike/controllers/map_controller.dart';
-import 'package:bike/screens/models.dart';
+import 'package:bike/models/models.dart';
 import 'package:bike/widgets/button.dart';
 import 'package:bike/widgets/textfield.dart';
 import 'package:bike/widgets/toast.dart';

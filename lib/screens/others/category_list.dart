@@ -38,7 +38,6 @@ class _NearStationCardsState extends State<NearStationCards> {
       height: 300, // ارتفاع اسلاید
       child: PageView.builder(
         controller: _pageController,
-        reverse: true,
         physics: const BouncingScrollPhysics(),
         itemCount: categories.length,
         itemBuilder: (context, index) {
@@ -86,7 +85,7 @@ class _StationCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
               child: Image.asset(
@@ -97,12 +96,15 @@ class _StationCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: SizedBox(
-                height: 44,
-                width: 160,
-                child: MyButton(buttonText: 'فاصله 50 متر', onTap: () {}),
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Align(
+                alignment: Alignment.topRight,
+                child: SizedBox(
+                  height: 44,
+                  width: 160,
+                  child: MyButton(buttonText: 'فاصله 50 متر', onTap: () {}),
+                ),
               ),
             ),
             const SizedBox(height: 8),
@@ -119,7 +121,7 @@ class _StationCard extends StatelessWidget {
               'تعداد دوچرخه: 2',
               textDirection: TextDirection.rtl,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha:  0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 4),
@@ -127,7 +129,7 @@ class _StationCard extends StatelessWidget {
               'جای پارک: 4',
               textDirection: TextDirection.rtl,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha:  0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ],

@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:bike/controllers/main_controller.dart';
-import 'package:bike/screens/category_list.dart';
+import 'package:bike/screens/others/category_list.dart';
 import 'package:bike/widgets/drawer_avatar.dart';
 import 'package:bike/widgets/my_drawer.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +16,7 @@ class HomeScreen extends StatelessWidget {
 
     return SafeArea(
       child: Scaffold(
-        endDrawer: const MyDrawer(),
+        drawer: const MyDrawer(),
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -28,96 +28,106 @@ class HomeScreen extends StatelessWidget {
               end: Alignment.bottomRight,
             ),
           ),
-          child: ListView(
-            physics: const BouncingScrollPhysics(),
-            children: [
+          child: CustomScrollView(
+            primary: true,
+            cacheExtent: 800,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
+            slivers: [
               // ====== HEADER ======
-              Builder(
-                builder: (context) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Row(
-                      children: [
-                        const DrawerAvatar(),
-                        const Spacer(),
-                        GestureDetector(
-                          onTap: () => Scaffold.of(context).openEndDrawer(),
-                          child: Text(
-                            'سلام مهدی',
-                            style: _theme.textTheme.titleLarge!.apply(
+              SliverToBoxAdapter(
+                child: Builder(
+                  builder: (context) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () => Scaffold.of(context).openDrawer(),
+                            child: Icon(
+                              LucideIcons.menu,
                               color: _theme.colorScheme.onPrimary,
-                              fontSizeFactor: 0.8,
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        GestureDetector(
-                          onTap: () => Scaffold.of(context).openEndDrawer(),
-                          child: Icon(
-                            LucideIcons.menu,
-                            color: _theme.colorScheme.onPrimary,
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () => Scaffold.of(context).openDrawer(),
+                            child: Text(
+                              'سلام مهدی',
+                              style: _theme.textTheme.titleLarge!.apply(
+                                color: _theme.colorScheme.onPrimary,
+                                fontSizeFactor: 0.8,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                          const Spacer(),
+
+                          const DrawerAvatar(),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
 
-              const SizedBox(height: 20),
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
               // ====== WEATHER CARD ======
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: RepaintBoundary(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(
-                        sigmaX: 3,
-                        sigmaY: 3,
-                      ), // سبک‌تر شد
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: _theme.colorScheme.onPrimary.withValues(
-                            alpha: 0.2,
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: RepaintBoundary(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(
+                          sigmaX: 3,
+                          sigmaY: 3,
+                        ), // سبک‌تر شد
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _theme.colorScheme.onPrimary.withValues(
+                              alpha: 0.2,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Image.asset(
-                              'assets/img/cloudly.png',
-                              width: 80,
-                              height: 65,
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '12°',
-                                  style: _theme.textTheme.titleLarge!.apply(
-                                    color: _theme.colorScheme.onPrimary,
-                                    fontWeightDelta: 2,
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '12°',
+                                    style: _theme.textTheme.titleLarge!.apply(
+                                      color: _theme.colorScheme.onPrimary,
+                                      fontWeightDelta: 2,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  'اصفهان',
-                                  style: _theme.textTheme.bodyLarge!.apply(
-                                    color: _theme.colorScheme.onPrimary,
+                                  Text(
+                                    'اصفهان',
+                                    style: _theme.textTheme.bodyLarge!.apply(
+                                      color: _theme.colorScheme.onPrimary,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  'چهارشنبه، 17 دی',
-                                  style: _theme.textTheme.bodyMedium!.apply(
-                                    color: _theme.colorScheme.onPrimary,
+                                  Text(
+                                    'چهارشنبه، 17 دی',
+                                    style: _theme.textTheme.bodyMedium!.apply(
+                                      color: _theme.colorScheme.onPrimary,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                              Image.asset(
+                                'assets/img/cloudly.png',
+                                width: 80,
+                                height: 65,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -125,14 +135,14 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
               // ====== HORIZONTAL ICON CARDS ======
-              SizedBox(
-                height: 110,
-                child: Directionality(
-                  textDirection: TextDirection.rtl,
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 110,
                   child: ListView(
+                    reverse: true,
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     children: [
@@ -149,140 +159,144 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
               // ====== CURRENT TRIP CARD ======
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        _theme.colorScheme.primary.withValues(alpha: 0.5),
-                        _theme.colorScheme.secondary.withValues(alpha: 0.9),
-                      ],
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          _theme.colorScheme.primary.withValues(alpha: 0.5),
+                          _theme.colorScheme.secondary.withValues(alpha: 0.9),
+                        ],
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                      ),
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(
+                        color: _theme.colorScheme.shadow.withValues(
+                          alpha: 0.15,
+                        ),
+                        width: 1.5,
+                      ),
+                      // boxShadow: [
+                      //   BoxShadow(
+                      //     color: Colors.black.withValues(alpha: 0.15),
+                      //     blurRadius: 1, // سبک‌تر شد
+                      //     offset: const Offset(0, 6),
+                      //   ),
+                      // ],
                     ),
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(
-                      color: _theme.colorScheme.shadow.withValues(alpha: 0.15),
-                      width: 1.5,
-                    ),
-                    // boxShadow: [
-                    //   BoxShadow(
-                    //     color: Colors.black.withValues(alpha: 0.15),
-                    //     blurRadius: 1, // سبک‌تر شد
-                    //     offset: const Offset(0, 6),
-                    //   ),
-                    // ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Icon(
-                            LucideIcons.bike,
-                            color: _theme.colorScheme.onPrimary,
-                            size: 35,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            "سفر جاری",
-                            style: _theme.textTheme.titleLarge!.apply(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Icon(
+                              LucideIcons.bike,
                               color: _theme.colorScheme.onPrimary,
-                              fontWeightDelta: 2,
+                              size: 35,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              "سفر جاری",
+                              style: _theme.textTheme.titleLarge!.apply(
+                                color: _theme.colorScheme.onPrimary,
+                                fontWeightDelta: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _tripInfo(
+                              _theme,
+                              LucideIcons.clock,
+                              "مدت زمان",
+                              "32 دقیقه",
+                            ),
+                            _tripInfo(
+                              _theme,
+                              LucideIcons.wallet,
+                              "هزینه",
+                              "45,000 تومان",
+                            ),
+                            _tripInfo(
+                              _theme,
+                              LucideIcons.bike,
+                              "شماره پلاک",
+                              "22",
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _theme.colorScheme.onPrimary,
+                            foregroundColor: _theme.colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                        ],
+                          onPressed: () {},
+                          icon: const Icon(LucideIcons.check),
+                          label: const Text("پایان سفر"),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+              // ====== TITLE ROW ======
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Row(
+                    children: [
+                      Text(
+                        'پیشنهادات',
+                        style: _theme.textTheme.titleMedium!.apply(
+                          color: _theme.colorScheme.onPrimary,
+                        ),
                       ),
-                      const SizedBox(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _tripInfo(
-                            _theme,
-                            LucideIcons.clock,
-                            "مدت زمان",
-                            "32 دقیقه",
-                          ),
-                          _tripInfo(
-                            _theme,
-                            LucideIcons.wallet,
-                            "هزینه",
-                            "45,000 تومان",
-                          ),
-                          _tripInfo(
-                            _theme,
-                            LucideIcons.bike,
-                            "شماره پلاک",
-                            "22",
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _theme.colorScheme.onPrimary,
-                          foregroundColor: _theme.colorScheme.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+
+                      const Spacer(),
+
+                      GestureDetector(
+                        onTap: () {
+                          final controller = Get.find<MainController>();
+                          controller.selectedIndex.value = 1; // تب نقشه
+                        },
+                        child: Text(
+                          'جستجو در نقشه',
+                          style: _theme.textTheme.titleMedium!.apply(
+                            color: _theme.colorScheme.onPrimary,
                           ),
                         ),
-                        onPressed: () {},
-                        icon: const Icon(LucideIcons.check),
-                        label: const Text("پایان سفر"),
                       ),
+
+                      const SizedBox(width: 6),
                     ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SliverToBoxAdapter(child: SizedBox(height: 10)),
 
-              // ====== TITLE ROW ======
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: Row(
-                  children: [
-                    Icon(
-                      LucideIcons.chevron_left,
-                      color: _theme.colorScheme.onPrimary,
-                    ),
-                    const SizedBox(width: 6),
-                    GestureDetector(
-                      onTap: () {
-                        final controller = Get.find<MainController>();
-                        controller.selectedIndex.value = 1; // تب نقشه
-                      },
-                      child: Text(
-                        'جستجو در نقشه',
-                        style: _theme.textTheme.titleMedium!.apply(
-                          color: _theme.colorScheme.onPrimary,
-                        ),
-                      ),
-                    ),
+              const SliverToBoxAdapter(child: NearStationCards()),
 
-                    const Spacer(),
-                    Text(
-                      'پیشنهادات',
-                      style: _theme.textTheme.titleMedium!.apply(
-                        color: _theme.colorScheme.onPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              const NearStationCards(),
-
-              const SizedBox(height: 40),
+              const SliverToBoxAdapter(child: SizedBox(height: 40)),
             ],
           ),
         ),

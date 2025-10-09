@@ -29,30 +29,6 @@ class AppThemes {
     ),
   };
 
-  // 🌙 تم‌های تاریک
-  static final Map<ThemeType, ThemeData> darkThemes = {
-    ThemeType.purpleBlue: _buildTheme(
-      primary: const Color(0xFF2DAFE6),
-      secondary: const Color(0xFF62358A),
-      brightness: Brightness.dark,
-    ),
-    ThemeType.greenYellow: _buildTheme(
-      primary: const Color(0xFFF5D100),
-      secondary: const Color(0xFF50CC7F),
-      brightness: Brightness.dark,
-    ),
-    ThemeType.redOrange: _buildTheme(
-      primary: const Color(0xFFFFA726),
-      secondary: const Color(0xFFE53935),
-      brightness: Brightness.dark,
-    ),
-    ThemeType.tealPink: _buildTheme(
-      primary: const Color(0xFFD81B60),
-      secondary: const Color(0xFF00897B),
-      brightness: Brightness.dark,
-    ),
-  };
-
   // 🎨 سازنده‌ی مشترک برای همه تم‌ها
   static ThemeData _buildTheme({
     required Color primary,
@@ -97,7 +73,7 @@ class AppThemes {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isLight ? const Color(0xFFF8F6F6) : const Color(0xFF2C2C2C),
+        fillColor: isLight ? const Color.fromARGB(255, 255, 255, 255) : const Color(0xFF2C2C2C),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: BorderSide.none,

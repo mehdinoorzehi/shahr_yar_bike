@@ -9,7 +9,7 @@ class DrawerAvatar extends StatelessWidget {
     return Builder(
       builder: (context) => AnimatedTouch(
         borderRadius: BorderRadius.circular(30),
-        onTap: () => Scaffold.of(context).openEndDrawer(),
+        onTap: () => Scaffold.of(context).openDrawer(),
         child: CircleAvatar(
           maxRadius: 30,
           child: Image.asset('assets/img/profile.png', fit: BoxFit.contain),

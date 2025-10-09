@@ -1,6 +1,6 @@
 import 'package:bike/app_routes.dart';
 import 'package:bike/widgets/button.dart';
-import 'package:bike/screens/item_of_transaction.dart';
+import 'package:bike/screens/others/item_of_transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:get/get.dart';

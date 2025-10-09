@@ -4,8 +4,8 @@ const Color kPurple = Color(0xFF62358A);
 const Color kBlue = Color(0xFF2DAFE6);
 
 
-const Color kGreen = Color(0xFF50CC7F);
-const Color kyellow = Color(0xFFF5D100);
+const Color kGreen = Color.fromARGB(255, 80, 204, 97);
+const Color kyellow = Color.fromARGB(255, 222, 219, 6);
 
 const Color kRed = Color(0xFFE53935);
 const Color kOrange = Color(0xFFFFA726);
