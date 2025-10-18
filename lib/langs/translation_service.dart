@@ -25,20 +25,40 @@ class TranslationService extends GetxService {
   Future<TranslationService> init() async {
     _prefs = await SharedPreferences.getInstance();
 
-    // خواندن زبان ذخیره‌شده
-    final savedKey = _prefs?.getString('selected_locale');
+    // 🔹 چک می‌کنیم آیا اولین اجرای برنامه است
+    final isFirstRun = _prefs?.getBool('first_run_translations') ?? true;
 
-    if (savedKey != null) {
-      currentLocale.value = _localeFromKey(savedKey);
-    } else {
-      // 🔹 اولین اجرا → دانلود زبان فارسی از سرور
+    if (isFirstRun) {
+      debugPrint("🚀 First launch → clearing only translation-related data...");
+
+      // 🔸 فقط کلیدهای مرتبط با ترجمه و زبان حذف می‌شوند
+      final keysToRemove = _prefs!.getKeys().where(
+        (key) => key.startsWith('translations_') || key == 'selected_locale',
+      );
+
+      for (final key in keysToRemove) {
+        await _prefs?.remove(key);
+      }
+
+      // ✅ علامت می‌زنیم که دیگر اولین اجرا نیست
+      await _prefs?.setBool('first_run_translations', false);
+
+      // 🔹 سپس زبان فارسی را از سرور می‌گیریم
       try {
-        debugPrint("🌍 First launch detected → fetching FA translations...");
+        debugPrint("🌍 Fetching Persian translations (first run)...");
         await changeLanguageByApiCode('fa', force: true);
         debugPrint("✅ Persian translations downloaded and applied.");
       } catch (e) {
         debugPrint("⚠️ Failed to fetch FA translations on first launch: $e");
       }
+    }
+
+    // -------------------------------------------------------------------------
+    // ادامه‌ی روند معمول
+    final savedKey = _prefs?.getString('selected_locale');
+
+    if (savedKey != null) {
+      currentLocale.value = _localeFromKey(savedKey);
     }
 
     final key = _localeKey(currentLocale.value);

@@ -2,6 +2,7 @@ import 'package:bike/app_routes.dart';
 import 'package:bike/controllers/initial_controller.dart';
 import 'package:bike/widgets/animated_background.dart';
 import 'package:bike/widgets/button.dart';
+import 'package:bike/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -164,13 +165,7 @@ class _CheckScreenState extends State<CheckScreen> {
                 Container(),
                 ElevatedButton.icon(
                   onPressed: () {
-                    Get.snackbar(
-                      "راهنمای نصب",
-                      "از منوی مرورگر، گزینه Add to Home Screen را بزنید.",
-                      backgroundColor: Colors.black87,
-                      colorText: Colors.white,
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
+                    showInfoToast(description: 'install_instructions'.tr);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: appInstalled
