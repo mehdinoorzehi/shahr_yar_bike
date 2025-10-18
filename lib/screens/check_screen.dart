@@ -206,9 +206,14 @@ class _CheckScreenState extends State<CheckScreen> {
       child: Scaffold(
         // ✅ نمایش دکمه Continue فقط وقتی هر دو اوکی باشند
         bottomNavigationBar: Obx(() {
+          final ctrl = checkServerController;
           final allOk =
-              checkServerController.serverOk.value &&
-              checkServerController.currentPosition.value != null;
+              ctrl.serverOk.value &&
+              ctrl.currentPosition.value != null &&
+              ctrl
+                  .locationErrorMessage
+                  .value
+                  .isEmpty; // ✅ بررسی عدم خطای لوکیشن
 
           if (!allOk) return const SizedBox();
 
@@ -221,6 +226,7 @@ class _CheckScreenState extends State<CheckScreen> {
             ),
           );
         }),
+
         backgroundColor: Colors.transparent,
         body: Center(
           child: SingleChildScrollView(
@@ -237,8 +243,7 @@ class _CheckScreenState extends State<CheckScreen> {
                     isOk: ctrl.serverOk.value,
                     onCheck: ctrl.checkServerConnection,
                     guideText: "help".tr,
-                    showGuide:
-                        !ctrl.serverOk.value, // ✅ اگر اوکی نبود راهنما نشون بده
+                    showGuide: !ctrl.serverOk.value,
                     isLoading: ctrl.serverLoading.value,
                   );
                 }),
@@ -246,21 +251,18 @@ class _CheckScreenState extends State<CheckScreen> {
                 // ✅ کارت لوکیشن
                 Obx(() {
                   final ctrl = checkServerController;
-                  String desc = "location_gps_message".tr;
-                  if (ctrl.locationErrorMessage.value.isNotEmpty) {
-                    desc = ctrl
-                        .locationErrorMessage
-                        .value; // ✅ متن خطا جایگزین میشه
-                  }
+                  final hasError = ctrl.locationErrorMessage.value.isNotEmpty;
+                  final desc = hasError
+                      ? ctrl.locationErrorMessage.value
+                      : "checked".tr;
 
                   return _buildCard(
                     title: "location".tr,
                     description: desc,
-                    isOk: ctrl.currentPosition.value != null,
+                    isOk: ctrl.currentPosition.value != null && !hasError,
                     onCheck: ctrl.checkLocation,
                     guideText: "help".tr,
-                    showGuide:
-                        ctrl.currentPosition.value == null, // ✅ در صورت خطا
+                    showGuide: hasError,
                     isLoading: ctrl.locationLoading.value,
                   );
                 }),

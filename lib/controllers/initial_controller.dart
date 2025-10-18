@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:bike/helper/go_to_check_screen.dart';
 import 'package:bike/helper/location_helper.dart';
 import 'package:bike/api/api_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -80,7 +79,6 @@ class InitialController extends GetxController {
       if (connectivityResult == ConnectivityResult.none) {
         message.value = 'اتصال اینترنت خود را فعال کنید';
         serverOk.value = false;
-        goToCheckScreen(message.value);
         return;
       }
 
@@ -88,14 +86,13 @@ class InitialController extends GetxController {
       if (response == null) {
         message.value = 'پاسخی از سرور دریافت نشد';
         serverOk.value = false;
-        goToCheckScreen(message.value);
         return;
       }
 
       message.value = response['message'] ?? 'پاسخی از سرور دریافت نشد';
       serverOk.value = response['ok'] == true;
 
-      // ✅ متدهای ورود (در صورت موجود بودن)
+      // ✅ متدهای ورود
       if (response['verification_methods'] != null) {
         final list = response['verification_methods'] as List;
         final parsed = list.map((m) => VerificationMethod.fromJson(m)).toList();
@@ -116,13 +113,12 @@ class InitialController extends GetxController {
   // -------------------- 🧭 بررسی موقعیت --------------------
   Future<void> checkLocation() async {
     locationLoading.value = true;
-    locationErrorMessage.value = ''; // ✅ پاک‌سازی پیام قبلی
+    locationErrorMessage.value = ''; // پاک‌سازی پیام قبلی
 
     try {
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         locationErrorMessage.value = 'سرویس موقعیت غیرفعال است';
-        goToCheckScreen(locationErrorMessage.value);
         return;
       }
 
@@ -134,14 +130,12 @@ class InitialController extends GetxController {
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
         locationErrorMessage.value = 'دسترسی به موقعیت رد شده است';
-        goToCheckScreen(locationErrorMessage.value);
         return;
       }
 
       final pos = await safeGetCurrentPosition();
       if (pos == null) {
         locationErrorMessage.value = 'خطا در دریافت موقعیت';
-        goToCheckScreen(locationErrorMessage.value);
         return;
       }
 
@@ -151,7 +145,6 @@ class InitialController extends GetxController {
     } catch (e) {
       locationErrorMessage.value = 'خطا در دریافت موقعیت';
       debugPrint("❌ خطا در checkLocation: $e");
-      goToCheckScreen(locationErrorMessage.value);
     } finally {
       locationLoading.value = false;
     }
@@ -172,12 +165,16 @@ class InitialController extends GetxController {
     }
   }
 
-  String getOnboardingImageUrl(int index) {
-    final translated = 'onboarding_pic_${index + 1}'.tr;
-    if (translated.isEmpty || translated.startsWith('onboarding_')) return '';
-    if (translated.startsWith('http')) return translated;
-    return translated;
-  }
+String getOnboardingImagePath(int index) {
+  final translated = 'onboarding_pic_${index + 1}'.tr;
+  if (translated.isEmpty || translated.startsWith('onboarding_')) return '';
+  return translated;
+}
+
+bool isNetworkImage(int index) {
+  final translated = 'onboarding_pic_${index + 1}'.tr;
+  return translated.startsWith('http');
+}
 
   @override
   void onClose() {

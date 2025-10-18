@@ -195,6 +195,10 @@
       splash.classList.add('fade-out');
       setTimeout(() => splash.remove(), 700);
     });
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
   </script>
 </body>
 </html>

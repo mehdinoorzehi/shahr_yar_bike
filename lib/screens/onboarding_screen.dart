@@ -59,22 +59,57 @@ class OnBoardingScreen extends StatelessWidget {
                         Expanded(
                           flex: 3,
                           child: Center(
-                            child: Image.network(
-                              controller.getOnboardingImageUrl(index),
-                              width: 250,
-                              height: 250,
-                              fit: BoxFit.contain,
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return const SizedBox(
-                                      width: 60,
-                                      height: 60,
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  },
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.error, color: Colors.red),
+                            child: Builder(
+                              builder: (context) {
+                                final imagePath = controller
+                                    .getOnboardingImagePath(index);
+                                final isNetwork = controller.isNetworkImage(
+                                  index,
+                                );
+
+                                if (imagePath.isEmpty) {
+                                  return const Icon(
+                                    Icons.image_not_supported,
+                                    color: Colors.grey,
+                                  );
+                                }
+
+                                return isNetwork
+                                    ? Image.network(
+                                        imagePath,
+                                        width: 250,
+                                        height: 250,
+                                        fit: BoxFit.contain,
+                                        loadingBuilder:
+                                            (context, child, progress) {
+                                              if (progress == null) {
+                                                return child;
+                                              }
+                                              return const SizedBox(
+                                                width: 60,
+                                                height: 60,
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              );
+                                            },
+                                        errorBuilder: (context, error, stack) =>
+                                            const Icon(
+                                              Icons.error,
+                                              color: Colors.red,
+                                            ),
+                                      )
+                                    : Image.asset(
+                                        imagePath,
+                                        width: 250,
+                                        height: 250,
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (context, error, stack) =>
+                                            const Icon(
+                                              Icons.error,
+                                              color: Colors.red,
+                                            ),
+                                      );
+                              },
                             ),
                           ),
                         ),

@@ -11,7 +11,8 @@ class TranslationService extends GetxService {
   SharedPreferences? _prefs;
   final String _apiBase = 'https://bike.sirjan.ir/demo/api/translations';
   final Map<String, int> _generatedAt = {}; // localeKey -> generated_at
-  bool get hasSavedLocaleSync => _prefs?.containsKey('selected_locale') ?? false;
+  bool get hasSavedLocaleSync =>
+      _prefs?.containsKey('selected_locale') ?? false;
 
   /// ✅ Reactive locale (for GetX to rebuild UI)
   final Rx<Locale> currentLocale = const Locale('fa', 'IR').obs;
@@ -24,8 +25,18 @@ class TranslationService extends GetxService {
 
     // خواندن زبان ذخیره‌شده
     final savedKey = _prefs?.getString('selected_locale');
+
     if (savedKey != null) {
       currentLocale.value = _localeFromKey(savedKey);
+    } else {
+      // 🔹 اولین اجرا → دانلود زبان فارسی از سرور
+      try {
+        debugPrint("🌍 First launch detected → fetching FA translations...");
+        await changeLanguageByApiCode('fa', force: true);
+        debugPrint("✅ Persian translations downloaded and applied.");
+      } catch (e) {
+        debugPrint("⚠️ Failed to fetch FA translations on first launch: $e");
+      }
     }
 
     final key = _localeKey(currentLocale.value);
@@ -77,7 +88,10 @@ class TranslationService extends GetxService {
   // ---------------------------------------------------------------------------
   // ✅ Change Language (with server fetch + cache fallback)
   // ---------------------------------------------------------------------------
-  Future<bool> changeLanguageByApiCode(String apiCode, {bool force = false}) async {
+  Future<bool> changeLanguageByApiCode(
+    String apiCode, {
+    bool force = false,
+  }) async {
     final locale = _localeFromApiCode(apiCode);
     final key = _localeKey(locale);
     final uri = Uri.parse('$_apiBase/$apiCode');
@@ -100,8 +114,9 @@ class TranslationService extends GetxService {
           return true;
         }
 
-        final Map<String, String> translationsMap =
-            Map<String, String>.from(body['translations'] ?? {});
+        final Map<String, String> translationsMap = Map<String, String>.from(
+          body['translations'] ?? {},
+        );
 
         // ✅ Update runtime translations
         AppTranslations.setLocaleMap(key, translationsMap);
@@ -131,8 +146,9 @@ class TranslationService extends GetxService {
 
     try {
       final parsed = jsonDecode(cached) as Map<String, dynamic>;
-      final Map<String, String> translationsMap =
-          Map<String, String>.from(parsed['translations'] ?? {});
+      final Map<String, String> translationsMap = Map<String, String>.from(
+        parsed['translations'] ?? {},
+      );
 
       AppTranslations.setLocaleMap(key, translationsMap);
 
