@@ -1,3 +1,5 @@
+import 'package:bike/helper/go_to_check_screen.dart';
+import 'package:bike/langs/translation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
@@ -77,20 +79,48 @@ class InitialController extends GetxController {
       final connectivityResult = await Connectivity().checkConnectivity();
       // ignore: unrelated_type_equality_checks
       if (connectivityResult == ConnectivityResult.none) {
-        message.value = 'اتصال اینترنت خود را فعال کنید';
+        message.value = 'internet_connection_error'.tr;
         serverOk.value = false;
         return;
       }
 
       final response = await ApiService.get('/init');
       if (response == null) {
-        message.value = 'پاسخی از سرور دریافت نشد';
+        message.value = 'server_response_error'.tr;
         serverOk.value = false;
         return;
       }
 
-      message.value = response['message'] ?? 'پاسخی از سرور دریافت نشد';
+      message.value = response['message'] ?? 'server_response_error'.tr;
       serverOk.value = response['ok'] == true;
+
+      // ✅ بررسی نسخه‌ی ترجمه‌ها
+      if (response['translations_build_at'] != null) {
+        final int serverBuildAt = response['translations_build_at'];
+        final localeKey =
+            TranslationService.to.currentLocale.value.languageCode;
+
+        // مقدار generated_at فعلی
+        final int localGeneratedAt =
+            TranslationService.to.generatedAt[localeKey] ?? 0;
+
+        debugPrint(
+          "🕓 Server build: $serverBuildAt | Local generated: $localGeneratedAt",
+        );
+
+        // اگر نسخه‌ی سرور جدیدتر بود، ترجمه‌ی جدید دریافت کن
+        if (serverBuildAt > localGeneratedAt) {
+          debugPrint("🔁 New translations detected → fetching...");
+          await TranslationService.to.changeLanguageByApiCode(
+            localeKey,
+            force: true,
+          );
+          Get.updateLocale(Locale(localeKey));
+          message.value = message.value.tr; // 👈 بروزرسانی با ترجمه جدید
+        } else {
+          debugPrint("✅ Local translations are up-to-date.");
+        }
+      }
 
       // ✅ متدهای ورود
       if (response['verification_methods'] != null) {
@@ -102,7 +132,7 @@ class InitialController extends GetxController {
         }
       }
     } catch (e) {
-      message.value = 'خطا در اتصال به سرور';
+      message.value = 'server_connection_error';
       serverOk.value = false;
       debugPrint("❌ خطا در checkServerConnection: $e");
     } finally {
@@ -118,7 +148,8 @@ class InitialController extends GetxController {
     try {
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        locationErrorMessage.value = 'سرویس موقعیت غیرفعال است';
+        locationErrorMessage.value = 'location_disabled'.tr;
+        goToCheckScreen();
         return;
       }
 
@@ -129,13 +160,15 @@ class InitialController extends GetxController {
 
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-        locationErrorMessage.value = 'دسترسی به موقعیت رد شده است';
+        locationErrorMessage.value = 'location_restricted'.tr;
+        goToCheckScreen();
         return;
       }
 
       final pos = await safeGetCurrentPosition();
       if (pos == null) {
-        locationErrorMessage.value = 'خطا در دریافت موقعیت';
+        locationErrorMessage.value = 'location_error'.tr;
+        goToCheckScreen();
         return;
       }
 
@@ -143,7 +176,8 @@ class InitialController extends GetxController {
       currentPosition.value = pos;
       locationErrorMessage.value = ''; // پاک‌سازی پیام خطا
     } catch (e) {
-      locationErrorMessage.value = 'خطا در دریافت موقعیت';
+      locationErrorMessage.value = 'location_error'.tr;
+      goToCheckScreen();
       debugPrint("❌ خطا در checkLocation: $e");
     } finally {
       locationLoading.value = false;

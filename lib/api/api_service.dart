@@ -56,7 +56,6 @@ class ApiService {
 
   // 🔹 POST
   static Future<dynamic> post(
-
     String endpoint,
     Map<String, dynamic> body,
   ) async {
@@ -165,7 +164,7 @@ class ApiService {
           .timeout(const Duration(seconds: 15));
 
       if (kDebugMode) {
-        print('🟩 [GET] Response: ${response.statusCode}');
+        print('🟩 [GET] Response: ${response.body.toString()}');
       }
       return handleResponse(response);
     } on SocketException {
@@ -228,9 +227,7 @@ class ApiService {
       case 502:
       case 503:
       case 504:
-        goToCheckScreen(
-          message.isNotEmpty ? message : 'خطای سرور، لطفاً دوباره تلاش کنید',
-        );
+        goToCheckScreen();
         break;
       default:
         showWarningToast(description: 'خطای ناشناخته');

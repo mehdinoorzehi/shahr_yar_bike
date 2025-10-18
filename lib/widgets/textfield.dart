@@ -108,7 +108,7 @@ class _MyTextFeildState extends State<MyTextFeild>
     }
 
     // در غیر این صورت با debounce کوتاه ولیدیت کن
-    _debounce = Timer(const Duration(milliseconds: 800), () {
+    _debounce = Timer(const Duration(milliseconds: 1700), () {
       if (!mounted) return;
       _validate(textValue);
     });

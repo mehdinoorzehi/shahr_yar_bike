@@ -12,59 +12,58 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData _theme = Theme.of(context);
-    // final checkController = Get.find<UnifiedController>();
+    final theme = Theme.of(context);
 
     return Scaffold(
-      body: AnimatedBackground(
-        child: Column(
-          children: [
-            Container(
-              height: 70,
-              alignment: Alignment.bottomRight,
-              padding: const EdgeInsets.only(bottom: 20, right: 40, left: 40),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+      body: SafeArea(
+        child: AnimatedBackground(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
                 children: [
-                  Text(
-                    'login_title'.tr,
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      color: _theme.colorScheme.onPrimary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  // 🔹 عنوان صفحه
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 24,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        'login_title'.tr,
+                        style: TextStyle(
+                          color: theme.colorScheme.onPrimary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // 🔹 محتوای اصلی
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(40),
+                          topRight: Radius.circular(40),
+                        ),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(28, 36, 28, 20),
+                        child: _Login(themeData: theme),
+                      ),
                     ),
                   ),
                 ],
-              ),
-            ),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.35),
-                    width: 1.2,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(50),
-                    topRight: Radius.circular(50),
-                  ),
-                  color: const Color.fromARGB(
-                    255,
-                    204,
-                    202,
-                    202,
-                  ).withValues(alpha: 0.4),
-                ),
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 48, 32, 32),
-                    child: _Login(themeData: _theme),
-                  ),
-                ),
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -78,33 +77,28 @@ class _Login extends GetView<InitialController> {
   @override
   Widget build(BuildContext context) {
     final authController = Get.find<AuthenticationController>();
+
     return Obx(() {
       if (controller.serverLoading.value) {
-        return const Center(
-          child: SizedBox(
-            width: 25,
-            height: 25,
-            child: CircularProgressIndicator(),
-          ),
-        );
+        return const Center(child: CircularProgressIndicator());
       }
 
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // 🔹 توضیحات
           Center(
             child: Text(
               'login_description'.tr,
-              style: themeData.textTheme.titleSmall!.apply(
+              style: themeData.textTheme.titleSmall?.copyWith(
                 color: themeData.colorScheme.onPrimary,
-                fontSizeDelta: 1.1,
+                fontSize: 15,
               ),
             ),
           ),
+          const SizedBox(height: 30),
 
-          const SizedBox(height: 24),
-
-          // 🔸 شماره تلفن
+          // 🔹 فیلد شماره تلفن
           MyTextFeild(
             controller: authController.phoneController,
             keyboardType: TextInputType.phone,
@@ -112,165 +106,138 @@ class _Login extends GetView<InitialController> {
               LucideIcons.phone,
               color: themeData.colorScheme.onPrimary,
             ),
-            hintTextDirection: TextDirection.ltr,
             hintText: 'phone_placeholder'.tr,
+            hintTextDirection: TextDirection.ltr,
             textDirection: TextDirection.ltr,
             maxLength: 11,
-            enableValidation: true, // ✅ فعال کن
+            enableValidation: true,
             validator: (value) {
               if (value.isEmpty) return 'نباید خالی باشد';
               if (!value.startsWith('09')) return 'شماره باید با 09 شروع شود';
               if (value.length != 11) return 'شماره باید 11 رقم باشد';
-              return ''; // یعنی معتبره
+              return '';
             },
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 25),
 
-          // 🔹 نمایش لیست متدهای تأیید
+          // 🔹 لیست متدهای تأیید (در صورت وجود)
           if (controller.methods.length > 1)
-            Column(
-              children: controller.methods.map((method) {
-                final isSelected =
-                    controller.selectedMethod.value?.method == method.method;
-                return GestureDetector(
-                  onTap: () => controller.selectedMethod(method),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeOut,
-                    margin: const EdgeInsets.symmetric(vertical: 3),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 6,
-                      horizontal: 16,
-                    ),
-                    // decoration: BoxDecoration(
-                    //   borderRadius: BorderRadius.circular(16),
-                    //   border: Border.all(
-                    //     color: isSelected
-                    //         ? themeData.colorScheme.primary
-                    //         : Colors.white.withValues(alpha: 0.4),
-                    //     width: 1.5,
-                    //   ),
-                    //   color: isSelected
-                    //       ? themeData.colorScheme.primary.withValues(
-                    //           alpha: 0.15,
-                    //         )
-                    //       : Colors.white.withValues(alpha: 0.15),
-                    // ),
-                    child: Row(
-                      children: [
-                        Radio<VerificationMethod>(
-                          value: method,
-                          // ignore: deprecated_member_use
-                          groupValue: controller.selectedMethod.value,
-                          // ignore: deprecated_member_use
-                          onChanged: (val) {
-                            if (val != null) controller.selectedMethod(val);
-                          },
-                          activeColor: themeData
-                              .colorScheme
-                              .onPrimary, // رنگ دایره انتخاب‌شده
-                          fillColor: WidgetStateProperty.resolveWith<Color>((
-                            states,
-                          ) {
-                            if (states.contains(WidgetState.selected)) {
-                              return themeData
-                                  .colorScheme
-                                  .onPrimary; // رنگ وقتی انتخاب شده
-                            }
-                            return Colors
-                                .white; // 🔹 رنگ دایره وقتی انتخاب نشده
-                          }),
-                        ),
-
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'verification_method.${method.method}'.tr,
-                            // method.method.tr,
-                            style: TextStyle(
-                              color: themeData.colorScheme.onPrimary,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                            ),
+            ...controller.methods.map((method) {
+              final isSelected =
+                  controller.selectedMethod.value?.method == method.method;
+              return GestureDetector(
+                onTap: () => controller.selectedMethod(method),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Radio<VerificationMethod>(
+                        value: method,
+                        // ignore: deprecated_member_use
+                        groupValue: controller.selectedMethod.value,
+                        // ignore: deprecated_member_use
+                        onChanged: (val) {
+                          if (val != null) controller.selectedMethod(val);
+                        },
+                        activeColor: themeData.colorScheme.onPrimary,
+                        fillColor: WidgetStateProperty.resolveWith((states) {
+                          return states.contains(WidgetState.selected)
+                              ? themeData.colorScheme.onPrimary
+                              : Colors.white;
+                        }),
+                      ),
+                      Expanded(
+                        child: Text(
+                          'verification_method.${method.method}'.tr,
+                          style: TextStyle(
+                            color: themeData.colorScheme.onPrimary,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                );
-              }).toList(),
-            ),
+                ),
+              );
+            }),
+          const SizedBox(height: 30),
 
-          const SizedBox(height: 60),
-
-          // 🔸 دکمه لاگین
+          // 🔹 دکمه لاگین
           MyButton(
             isLoading: authController.isLoadingLogin.value,
             buttonText: 'login_button'.tr,
             isFocus: true,
             onTap: () async {
-              // از initialController متد انتخاب‌شده را به auth بده
               authController.selectedMethod.value =
                   controller.selectedMethod.value?.method ?? '';
-
               await authController.requestVerification();
             },
           ),
 
-          const SizedBox(height: 50),
+          const Spacer(),
 
-          // نکات پایین فرم
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [..._buildLoginTips(themeData)],
-          ),
+          // 🔹 نکات پایین صفحه
+          _buildTipsSection(themeData),
         ],
       );
     });
   }
+
+  Widget _buildTipsSection(ThemeData themeData) {
+    final tips = _buildLoginTips(themeData);
+    return Column(
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 40),
+        Divider(color: themeData.colorScheme.onPrimary.withValues(alpha: 0.3)),
+        const SizedBox(height: 16),
+        ...tips,
+      ],
+    );
+  }
 }
 
+// ✅ ساخت ویجت نکات
 Widget buildTip(String text, ThemeData themeData) {
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    // textDirection: TextDirection.rtl,
-    children: [
-      Icon(
-        LucideIcons.circle_check,
-        color: themeData.colorScheme.onPrimary.withValues(alpha: 0.85),
-        size: 18,
-      ),
-      const SizedBox(width: 6),
-      Flexible(
-        child: Text(
-          text,
-          textDirection: TextDirection.rtl,
-          style: themeData.textTheme.bodyMedium!.copyWith(
-            color: themeData.colorScheme.onPrimary.withValues(alpha: 0.85),
-            height: 1.5,
-            fontSize: 13.5,
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          LucideIcons.circle_check,
+          color: themeData.colorScheme.onPrimary.withValues(alpha: 0.8),
+          size: 18,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            // textDirection: TextDirection.rtl,
+            style: themeData.textTheme.bodyMedium?.copyWith(
+              color: themeData.colorScheme.onPrimary.withValues(alpha: 0.8),
+              height: 1.5,
+              fontSize: 13.5,
+            ),
           ),
         ),
-      ),
-    ],
+      ],
+    ),
   );
 }
 
 List<Widget> _buildLoginTips(ThemeData themeData) {
-  List<Widget> tips = [];
+  final tips = <Widget>[];
   int index = 1;
 
   while (true) {
     final key = 'login_request_help_$index';
     final text = key.tr;
-
-    // اگر کلید خالی یا برابر کلید خودش بود یعنی ترجمه وجود نداره → توقف
     if (text.isEmpty || text == key) break;
-
     tips.add(buildTip(text, themeData));
-    tips.add(const SizedBox(height: 8));
-
     index++;
   }
 

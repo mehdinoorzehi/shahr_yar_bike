@@ -156,7 +156,7 @@ class _LanguageSelectorWidgetState extends State<LanguageSelectorWidget> {
       onTap: () => _selectLang(code),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        width: 70, // 👈 اندازه ثابت برای جلوگیری از پرش
+        width: 70,
         padding: const EdgeInsets.fromLTRB(8, 14, 8, 14),
         decoration: BoxDecoration(
           color: isActive

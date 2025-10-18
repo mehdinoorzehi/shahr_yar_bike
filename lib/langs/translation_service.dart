@@ -10,7 +10,9 @@ class TranslationService extends GetxService {
 
   SharedPreferences? _prefs;
   final String _apiBase = 'https://bike.sirjan.ir/demo/api/translations';
-  final Map<String, int> _generatedAt = {}; // localeKey -> generated_at
+  final Map<String, int> generatedAt = {}; // localeKey -> generated_at
+  int getGeneratedAt(String key) => generatedAt[key] ?? 0;
+
   bool get hasSavedLocaleSync =>
       _prefs?.containsKey('selected_locale') ?? false;
 
@@ -48,7 +50,7 @@ class TranslationService extends GetxService {
         final map = Map<String, String>.from(parsed['translations'] ?? {});
         AppTranslations.setLocaleMap(key, map);
 
-        _generatedAt[key] = parsed['generated_at'] is int
+        generatedAt[key] = parsed['generated_at'] is int
             ? parsed['generated_at']
             : int.tryParse('${parsed['generated_at']}') ?? 0;
       } catch (e) {
@@ -107,8 +109,8 @@ class TranslationService extends GetxService {
 
         // ✅ Check version (only update if newer)
         if (!force &&
-            _generatedAt.containsKey(key) &&
-            gen <= (_generatedAt[key] ?? 0) &&
+            generatedAt.containsKey(key) &&
+            gen <= (generatedAt[key] ?? 0) &&
             AppTranslations().keys.containsKey(key)) {
           _applyLocale(locale, key);
           return true;
@@ -120,7 +122,7 @@ class TranslationService extends GetxService {
 
         // ✅ Update runtime translations
         AppTranslations.setLocaleMap(key, translationsMap);
-        _generatedAt[key] = gen;
+        generatedAt[key] = gen;
 
         // ✅ Save cache
         await _prefs?.setString('translations_$key', res.body);
@@ -152,7 +154,7 @@ class TranslationService extends GetxService {
 
       AppTranslations.setLocaleMap(key, translationsMap);
 
-      _generatedAt[key] = parsed['generated_at'] is int
+      generatedAt[key] = parsed['generated_at'] is int
           ? parsed['generated_at']
           : int.tryParse('${parsed['generated_at']}') ?? 0;
 

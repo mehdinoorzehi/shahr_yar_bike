@@ -109,7 +109,7 @@ class _CheckScreenState extends State<CheckScreen> {
                         child: CircularProgressIndicator(color: Colors.white),
                       )
                     : Text(
-                        isOk ? 'checked'.tr : 'check'.tr,
+                        isOk ? 'check_again'.tr : 'check'.tr,
                         style: const TextStyle(color: Colors.white),
                       ),
               ),
@@ -239,7 +239,7 @@ class _CheckScreenState extends State<CheckScreen> {
                     title: "server_connection".tr,
                     description: ctrl.message.value.isNotEmpty
                         ? ctrl.message.value
-                        : "در حال بررسی اتصال به سرور...",
+                        : "server_checking".tr,
                     isOk: ctrl.serverOk.value,
                     onCheck: ctrl.checkServerConnection,
                     guideText: "help".tr,
@@ -249,10 +249,20 @@ class _CheckScreenState extends State<CheckScreen> {
                 }),
 
                 // ✅ کارت لوکیشن
+                // ✅ کارت لوکیشن
                 Obx(() {
                   final ctrl = checkServerController;
                   final hasError = ctrl.locationErrorMessage.value.isNotEmpty;
-                  final desc = hasError ? ctrl.locationErrorMessage.value : '';
+
+                  // توضیحات بر اساس وضعیت
+                  String desc = '';
+                  if (ctrl.locationLoading.value) {
+                    desc = 'location_checking'.tr;
+                  } else if (ctrl.currentPosition.value != null && !hasError) {
+                    desc = 'location_success'.tr;
+                  } else if (hasError) {
+                    desc = ctrl.locationErrorMessage.value;
+                  }
 
                   return _buildCard(
                     title: "location".tr,

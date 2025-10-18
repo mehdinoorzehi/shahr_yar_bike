@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:bike/app_routes.dart';
 import 'package:bike/controllers/authentication_controller.dart';
-import 'package:bike/screens/auth/login_screen.dart';
 import 'package:bike/theme/app_colors.dart';
 import 'package:bike/widgets/animated_background.dart';
 import 'package:bike/widgets/button.dart';
@@ -17,76 +16,62 @@ class OtpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeData = Theme.of(context);
+    final theme = Theme.of(context);
     final authController = Get.find<AuthenticationController>();
 
-    // 🟢 اگر متد از نوع sms_from_user است:
+    // 🔹 حالت نمایش فقط کد برای ارسال از کاربر
     if (authController.selectedMethod.value == 'sms_from_user') {
       return Scaffold(
-        body: AnimatedBackground(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Center(
-                    child: Icon(
+        body: SafeArea(
+          child: AnimatedBackground(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
                       LucideIcons.smartphone,
                       color: Colors.white,
                       size: 80,
                     ),
-                  ),
-                  const SizedBox(height: 30),
-                  Center(
-                    child: Text(
+                    const SizedBox(height: 30),
+                    Text(
                       'verification_code_display'.trNamed({
                         'provider_number': authController.providerNumber.value,
                       }),
-                      style: themeData.textTheme.titleMedium!.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Center(
-                    child: Text(
+                    const SizedBox(height: 24),
+                    Text(
                       authController.userCode.value,
                       style: const TextStyle(
-                        fontSize: 40,
+                        fontSize: 42,
                         fontWeight: FontWeight.bold,
                         color: Colors.amber,
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 40),
-                  Center(
-                    child: Text(
+                    const SizedBox(height: 40),
+                    Text(
                       "after_sending_code_press_check".tr,
-                      style: themeData.textTheme.titleMedium!.copyWith(
+                      style: theme.textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                  ),
-                  const SizedBox(height: 15),
-
-                  MyButton(
-                    isFocus: true,
-                    buttonText: "check".tr,
-                    onTap: () => Get.offAllNamed(AppRoutes.home),
-                  ),
-                  const SizedBox(height: 110),
-
-                  // ✅ نکات پایین فرم
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [..._buildOtpTips(themeData)],
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    MyButton(
+                      isFocus: true,
+                      buttonText: "check".tr,
+                      onTap: () => Get.offAllNamed(AppRoutes.home),
+                    ),
+                    const SizedBox(height: 60),
+                    _buildTipsSection(theme),
+                  ],
+                ),
               ),
             ),
           ),
@@ -94,153 +79,194 @@ class OtpScreen extends StatelessWidget {
       );
     }
 
+    // 🔹 حالت عادی OTP
     return Scaffold(
-      body: AnimatedBackground(
-        child: Column(
-          children: [
-            Container(
-              alignment: Alignment.bottomRight,
-              padding: const EdgeInsets.only(bottom: 20, right: 40, left: 40),
-              height: 70,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-
+      body: SafeArea(
+        child: AnimatedBackground(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
                 children: [
-                  Text(
-                    'sms_code'.tr,
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      color: themeData.colorScheme.onPrimary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.35),
-                    width: 1.2,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(50),
-                    topRight: Radius.circular(50),
-                  ),
-                  color: const Color.fromARGB(
-                    255,
-                    204,
-                    202,
-                    202,
-                  ).withValues(alpha: 0.4),
-                ),
-                child: SingleChildScrollView(
-                  child: Padding(
+                  // 🔹 عنوان
+                  Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 32,
-                      vertical: 60,
+                      vertical: 20,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: Text(
-                            'verification_code_sent'.trNamed({
-                              'number': authController.phoneController.text,
-                            }),
-                            textAlign: TextAlign.center,
-                            style: themeData.textTheme.titleSmall!.apply(
-                              color: themeData.colorScheme.onPrimary,
-                              fontSizeFactor: 1.1,
-                            ),
-                          ),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        'sms_code'.tr,
+                        style: TextStyle(
+                          color: theme.colorScheme.onPrimary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 24),
-                        Center(
-                          child: SizedBox(
-                            width: 200,
-                            child: MyTextFeild(
-                              controller: authController.otpController,
-                              maxLength: 6,
-                              textDirection: TextDirection.ltr,
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+                      ),
+                    ),
+                  ),
+
+                  // 🔹 بخش محتوای اصلی
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(40),
+                          topRight: Radius.circular(40),
                         ),
-
-                        // const SizedBox(height: 20),
-                        // ResendCodeCircle(
-                        //   seconds: 120,
-                        //   onResend: () async {
-                        //     await authController.requestVerification();
-                        //   },
-                        // ),
-                        const SizedBox(height: 20),
-
-                        // 🔹 تایمر دایره‌ای وسط
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(32, 48, 32, 32),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // 🔹 دکمه ویرایش شماره
-                            _GlassButton(
-                              icon: LucideIcons.pencil,
-                              label: "edit_number".tr,
-                              onTap: () => Get.back(),
-                              themeData: themeData,
+                            // 🔹 توضیح بالای فرم
+                            Center(
+                              child: Text(
+                                'verification_code_sent'.trNamed({
+                                  'number': authController.phoneController.text,
+                                }),
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.titleSmall?.apply(
+                                  color: theme.colorScheme.onPrimary,
+                                  fontSizeFactor: 1.1,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+
+                            // 🔹 فیلد وارد کردن کد
+                            Center(
+                              child: SizedBox(
+                                width: 200,
+                                child: MyTextFeild(
+                                  controller: authController.otpController,
+                                  maxLength: 6,
+                                  textDirection: TextDirection.ltr,
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 35),
+
+                            // 🔹 دو دکمه (ویرایش و ارسال مجدد) واکنش‌گرا
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 12,
+                              alignment: WrapAlignment.center,
+                              children: [
+                                _GlassButton(
+                                  icon: LucideIcons.pencil,
+                                  label: "edit_number".tr,
+                                  onTap: () => Get.back(),
+                                  themeData: theme,
+                                ),
+                                Obx(
+                                  () => ResendCodeButton(
+                                    seconds: authController.remainingTime.value,
+                                    onResend: () async {
+                                      await authController
+                                          .requestVerification();
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
 
-                            // 🔹 دکمه ارسال مجدد کد
+                            const SizedBox(height: 60),
+
+                            // 🔹 دکمه ادامه
                             Obx(
-                              () => ResendCodeButton(
-                                seconds: authController.remainingTime.value,
-                                onResend: () async {
-                                  await authController.requestVerification();
+                              () => MyButton(
+                                isLoading: authController.isLoadingOtp.value,
+                                isFocus: true,
+                                buttonText: 'continue_btn'.tr,
+                                onTap: () async {
+                                  await authController.verifyCode();
                                 },
                               ),
                             ),
+
+                            const SizedBox(height: 100),
+
+                            // 🔹 Divider + نکات پایین صفحه
+                            _buildTipsSection(theme),
                           ],
                         ),
-                        const SizedBox(height: 80),
-                        Obx(
-                          () => MyButton(
-                            isLoading: authController.isLoadingOtp.value,
-                            isFocus: true,
-                            buttonText: 'continue_btn'.tr,
-                            onTap: () async {
-                              await authController.verifyCode();
-                            },
-                          ),
-                        ),
-
-                        const SizedBox(height: 110),
-
-                        // 🔹 دکمه راهنمای ورود موقتاً غیرفعال شد
-                        // TextButton.icon(
-                        //   onPressed: () { ... },
-                        //   icon: Text("راهنمای ورود"),
-                        //   label: Icon(LucideIcons.circle_question_mark),
-                        // ),
-
-                        // ✅ نکات پایین فرم
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [..._buildOtpTips(themeData)],
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-          ],
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
+
+  // 🔹 ویجت نکات پایین صفحه (مثل لاگین)
+  Widget _buildTipsSection(ThemeData theme) {
+    final tips = _buildOtpTips(theme);
+    return Column(
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 30),
+        Divider(color: theme.colorScheme.onPrimary.withValues(alpha: 0.3)),
+        const SizedBox(height: 16),
+        ...tips,
+      ],
+    );
+  }
 }
+
+// ✅ ساخت ویجت نکات
+Widget buildTip(String text, ThemeData themeData) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          LucideIcons.circle_check,
+          color: themeData.colorScheme.onPrimary.withValues(alpha: 0.8),
+          size: 18,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            // textDirection: TextDirection.rtl,
+            style: themeData.textTheme.bodyMedium?.copyWith(
+              color: themeData.colorScheme.onPrimary.withValues(alpha: 0.8),
+              height: 1.5,
+              fontSize: 13.5,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// List<Widget> _buildOtpTips(ThemeData themeData) {
+//   final tips = <Widget>[];
+//   int index = 1;
+//   while (true) {
+//     final key = 'otp_help_$index';
+//     final text = key.tr;
+//     if (text.isEmpty || text == key) break;
+//     tips.add(buildTip(text, themeData));
+//     index++;
+//   }
+//   return tips;
+// }
 
 class _GlassButton extends StatelessWidget {
   final IconData? icon; // ✅ قابل null شدن
@@ -278,27 +304,23 @@ class _GlassButton extends StatelessWidget {
           ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
-            child:  Row(
-                    key: const ValueKey('content'),
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (icon != null)
-                        Icon(
-                          icon,
-                          size: 16,
-                          color: themeData.colorScheme.onPrimary,
-                        ),
-                      const SizedBox(width: 6),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          color: themeData.colorScheme.onPrimary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+            child: Row(
+              key: const ValueKey('content'),
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null)
+                  Icon(icon, size: 16, color: themeData.colorScheme.onPrimary),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: themeData.colorScheme.onPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
                   ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -421,8 +443,8 @@ class _ResendCodeButtonState extends State<ResendCodeButton>
             colors: isActive
                 ? [kPurple, kBlue]
                 : [
-                    Colors.white.withValues(alpha:0.15),
-                    Colors.white.withValues(alpha:0.05),
+                    Colors.white.withValues(alpha: 0.15),
+                    Colors.white.withValues(alpha: 0.05),
                   ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -434,10 +456,10 @@ class _ResendCodeButtonState extends State<ResendCodeButton>
             decoration: BoxDecoration(
               gradient: gradient,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withValues(alpha:0.2)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha:0.15),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
