@@ -75,14 +75,14 @@ class SendRequestScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         const MyTextFeild(
-                          suffoxIcon: Icon(LucideIcons.user),
+                          suffixIcon: Icon(LucideIcons.user),
                           hintText: 'نام',
                           hintTextDirection: TextDirection.rtl,
                         ),
                         const SizedBox(height: 20),
                         const MyTextFeild(
                           keyboardType: TextInputType.phone,
-                          suffoxIcon: Icon(LucideIcons.phone),
+                          suffixIcon: Icon(LucideIcons.phone),
                           hintText: 'شماره تماس',
                           hintTextDirection: TextDirection.rtl,
                           textDirection: TextDirection.ltr,
@@ -90,7 +90,7 @@ class SendRequestScreen extends StatelessWidget {
                         const SizedBox(height: 20),
 
                         const MyTextFeild(
-                          suffoxIcon: Icon(LucideIcons.mail),
+                          suffixIcon: Icon(LucideIcons.mail),
                           hintText: 'متن درخواست',
                           hintTextDirection: TextDirection.rtl,
                         ),

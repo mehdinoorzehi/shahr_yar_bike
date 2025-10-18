@@ -1,64 +1,59 @@
 import 'package:bike/widgets/button.dart';
 import 'package:flutter/material.dart';
 
-class NearStationCards extends StatefulWidget {
+class NearStationCards extends StatelessWidget {
   const NearStationCards({super.key});
-
-  @override
-  State<NearStationCards> createState() => _NearStationCardsState();
-}
-
-class _NearStationCardsState extends State<NearStationCards> {
-  final PageController _pageController = PageController(viewportFraction: 0.78);
-  double _currentPage = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentPage = _pageController.initialPage.toDouble();
-    _pageController.addListener(() {
-      setState(() {
-        _currentPage =
-            _pageController.page ?? _pageController.initialPage.toDouble();
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final categories = AppDatabase.categories;
+    final controller = PageController(viewportFraction: 0.78);
 
     return SizedBox(
-      height: 300, // ارتفاع اسلاید
-      child: PageView.builder(
-        controller: _pageController,
+      height: 300,
+      child: PageView.custom(
+        controller: controller,
         physics: const BouncingScrollPhysics(),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final distance = (_currentPage - index).abs();
-          final double scale = (1 - (distance * 0.1))
-              .clamp(0.9, 1.05)
-              .toDouble();
-          final double opacity = (1 - (distance * 0.35))
-              .clamp(0.6, 1.0)
-              .toDouble();
+        childrenDelegate: SliverChildBuilderDelegate((context, index) {
+          if (index >= categories.length) return null;
+          return AnimatedBuilder(
+            animation: controller,
+            builder: (context, child) {
+              double value = 0.0;
+              if (controller.position.haveDimensions) {
+                value = controller.page! - index;
+              } else {
+                value = controller.initialPage - index.toDouble();
+              }
 
-          return AnimatedOpacity(
-            duration: const Duration(milliseconds: 200),
-            opacity: opacity,
-            child: Transform.scale(
-              scale: scale,
-              alignment: Alignment.center,
-              child: _StationCard(category: categories[index]),
-            ),
+              // نرم کردن انیمیشن‌ها با منحنی easeOut
+              final double scale = (1 - (value.abs() * 0.1))
+                  .clamp(0.9, 1.05)
+                  .toDouble();
+              final double opacity = (1 - (value.abs() * 0.35))
+                  .clamp(0.6, 1.0)
+                  .toDouble();
+
+              // اضافه کردن slight rotation برای جلوه‌ی depth
+              final double rotation = value * 0.08; // زاویه جزئی
+
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.0015)
+                  ..rotateY(rotation)
+                  // ignore: deprecated_member_use
+                  ..scale(scale),
+                child: Opacity(
+                  opacity: opacity,
+                  child: RepaintBoundary(
+                    child: _StationCard(category: categories[index]),
+                  ),
+                ),
+              );
+            },
           );
-        },
+        }, childCount: categories.length),
       ),
     );
   }
@@ -81,12 +76,20 @@ class _StationCard extends StatelessWidget {
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha:0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // تصویر
             Center(
               child: Image.asset(
                 'assets/img/Bitmap.png',
@@ -96,6 +99,8 @@ class _StationCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
+
+            // دکمه فاصله
             Directionality(
               textDirection: TextDirection.ltr,
               child: Align(
@@ -103,11 +108,14 @@ class _StationCard extends StatelessWidget {
                 child: SizedBox(
                   height: 44,
                   width: 160,
-                  child: MyButton(buttonText: 'فاصله 50 متر', onTap: () {}),
+                  child: MyButton(buttonText: 'فاصله ۵۰ متر', onTap: () {}),
                 ),
               ),
             ),
+
             const SizedBox(height: 8),
+
+            // عنوان
             Text(
               'ایستگاه ${category.title}',
               textDirection: TextDirection.rtl,
@@ -116,20 +124,23 @@ class _StationCard extends StatelessWidget {
                 color: theme.colorScheme.onSurface,
               ),
             ),
+
             const SizedBox(height: 4),
+
+            // اطلاعات
             Text(
-              'تعداد دوچرخه: 2',
+              'تعداد دوچرخه: ۲',
               textDirection: TextDirection.rtl,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha:  0.7),
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              'جای پارک: 4',
+              'جای پارک: ۴',
               textDirection: TextDirection.rtl,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha:0.7),
               ),
             ),
           ],

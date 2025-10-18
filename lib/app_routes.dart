@@ -3,7 +3,7 @@ import 'package:bike/screens/auth/otp_screen.dart';
 import 'package:bike/screens/check_screen.dart';
 import 'package:bike/screens/language_selector_screen.dart';
 import 'package:bike/screens/others/bike_details_screen.dart';
-import 'package:bike/screens/splash/onboarding_screen.dart';
+import 'package:bike/screens/onboarding_screen.dart';
 import 'package:bike/screens/others/invite_friend_screen.dart';
 import 'package:bike/screens/main_screen.dart';
 import 'package:bike/screens/others/profile_screen.dart';

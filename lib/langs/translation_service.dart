@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'app_translations.dart';
 
 class TranslationService extends GetxService {
   static TranslationService get to => Get.find();
 
-  final GetStorage _box = GetStorage();
+  SharedPreferences? _prefs;
   final String _apiBase = 'https://bike.sirjan.ir/demo/api/translations';
   final Map<String, int> _generatedAt = {}; // localeKey -> generated_at
+  bool get hasSavedLocaleSync => _prefs?.containsKey('selected_locale') ?? false;
 
   /// ✅ Reactive locale (for GetX to rebuild UI)
   final Rx<Locale> currentLocale = const Locale('fa', 'IR').obs;
@@ -19,14 +20,16 @@ class TranslationService extends GetxService {
   // ✅ Initialization
   // ---------------------------------------------------------------------------
   Future<TranslationService> init() async {
+    _prefs = await SharedPreferences.getInstance();
+
     // خواندن زبان ذخیره‌شده
-    final savedKey = _box.read('selected_locale') as String?;
+    final savedKey = _prefs?.getString('selected_locale');
     if (savedKey != null) {
       currentLocale.value = _localeFromKey(savedKey);
     }
 
     final key = _localeKey(currentLocale.value);
-    final cached = _box.read('translations_$key') as String?;
+    final cached = _prefs?.getString('translations_$key');
 
     if (cached != null) {
       try {
@@ -105,8 +108,8 @@ class TranslationService extends GetxService {
         _generatedAt[key] = gen;
 
         // ✅ Save cache
-        await _box.write('translations_$key', res.body);
-        await _box.write('selected_locale', key);
+        await _prefs?.setString('translations_$key', res.body);
+        await _prefs?.setString('selected_locale', key);
 
         _applyLocale(locale, key);
         return true;
@@ -123,7 +126,7 @@ class TranslationService extends GetxService {
   // ✅ Apply cache if server fails
   // ---------------------------------------------------------------------------
   bool _applyCacheIfExists(String key, Locale locale) {
-    final cached = _box.read('translations_$key') as String?;
+    final cached = _prefs?.getString('translations_$key');
     if (cached == null) return false;
 
     try {
@@ -151,6 +154,6 @@ class TranslationService extends GetxService {
   void _applyLocale(Locale locale, String key) {
     currentLocale.value = locale; // Reactive update
     Get.updateLocale(locale); // Apply immediately in UI
-    _box.write('selected_locale', key); // Persist
+    _prefs?.setString('selected_locale', key); // Persist
   }
 }

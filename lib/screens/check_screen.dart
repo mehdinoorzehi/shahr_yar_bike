@@ -1,6 +1,5 @@
 import 'package:bike/app_routes.dart';
-import 'package:bike/controllers/check_access_controller.dart';
-import 'package:bike/controllers/install_web_app_controller.dart';
+import 'package:bike/controllers/initial_controller.dart';
 import 'package:bike/widgets/animated_background.dart';
 import 'package:bike/widgets/button.dart';
 import 'package:flutter/material.dart';
@@ -14,13 +13,10 @@ class CheckScreen extends StatefulWidget {
 }
 
 class _CheckScreenState extends State<CheckScreen> {
-  // bool serverOk = false;
-  // bool locationOk = false;
   bool appInstalled = false;
-  final checkServerController = Get.find<CheckAccessController>();
+  final checkServerController = Get.find<InitialController>();
 
   void _goNext() {
-    // if (serverOk && locationOk)
     Get.toNamed(AppRoutes.onBoarding);
   }
 
@@ -30,6 +26,7 @@ class _CheckScreenState extends State<CheckScreen> {
     required bool isOk,
     required VoidCallback? onCheck,
     required String guideText,
+    bool showGuide = false, // ✅ اضافه شد
     bool isLoading = false,
   }) {
     final screenWidth = Get.width;
@@ -53,70 +50,72 @@ class _CheckScreenState extends State<CheckScreen> {
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
-            const SizedBox(height: 6),
-            Text(
-              description,
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              style: const TextStyle(color: Colors.white70, fontSize: 13),
-            ),
-            const SizedBox(height: 14),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            description,
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
+          ),
+          const SizedBox(height: 14),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (showGuide) // ✅ فقط در صورت نیاز نمایش داده شود
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Get.snackbar(
+                      "راهنما",
+                      "لطفاً تنظیمات دستگاه خود را بررسی کنید.",
+                      backgroundColor: Colors.black87,
+                      colorText: Colors.white,
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  },
                   style: TextButton.styleFrom(
-                    foregroundColor: isOk
-                        ? Colors.greenAccent
-                        : Colors.redAccent,
+                    foregroundColor: Colors.amberAccent,
                   ),
                   child: Text(guideText),
-                ),
-                ElevatedButton.icon(
-                  onPressed: onCheck,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isOk
-                        ? Colors.greenAccent
-                        : Colors.redAccent,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                )
+              else
+                const SizedBox(),
+              ElevatedButton.icon(
+                onPressed: onCheck,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isOk ? Colors.greenAccent : Colors.redAccent,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  icon: isOk
-                      ? const Icon(Icons.check, size: 18, color: Colors.white)
-                      : const SizedBox(),
-                  label: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(color: Colors.white),
-                        )
-                      : Text(
-                          isOk ? 'چک شد' : 'چک کنید',
-                          style: const TextStyle(color: Colors.white),
-                        ),
                 ),
-              ],
-            ),
-          ],
-        ),
+                icon: isOk
+                    ? const Icon(Icons.check, size: 18, color: Colors.white)
+                    : const SizedBox(),
+                label: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(color: Colors.white),
+                      )
+                    : Text(
+                        isOk ? 'checked'.tr : 'check'.tr,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -145,31 +144,33 @@ class _CheckScreenState extends State<CheckScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'نصب وب‌اپلیکیشن',
-              textAlign: TextAlign.right,
-              style: TextStyle(
+            Text(
+              'install_webapp'.tr,
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'برای دسترسی سریع‌تر، این اپ را به صفحه اصلی خود اضافه کنید',
-              textAlign: TextAlign.right,
-              style: TextStyle(color: Colors.white70, fontSize: 13),
+            Text(
+              "install_webapp_message".tr,
+              style: const TextStyle(color: Colors.white70, fontSize: 13),
             ),
             const SizedBox(height: 14),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
               children: [
                 Container(),
-
                 ElevatedButton.icon(
                   onPressed: () {
-                    InstallController.instance.showInstallPrompt();
+                    Get.snackbar(
+                      "راهنمای نصب",
+                      "از منوی مرورگر، گزینه Add to Home Screen را بزنید.",
+                      backgroundColor: Colors.black87,
+                      colorText: Colors.white,
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: appInstalled
@@ -184,7 +185,7 @@ class _CheckScreenState extends State<CheckScreen> {
                       ? const Icon(Icons.check, size: 18)
                       : const SizedBox(),
                   label: Text(
-                    appInstalled ? 'نصب شده' : 'نصب کنید',
+                    appInstalled ? 'نصب شده' : 'install'.tr,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -203,37 +204,67 @@ class _CheckScreenState extends State<CheckScreen> {
   Widget build(BuildContext context) {
     return AnimatedBackground(
       child: Scaffold(
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.only(left: 30.0, right: 30.0, bottom: 15.0),
-          child: MyButton(isFocus: true, buttonText: 'ادامه', onTap: _goNext),
-        ),
+        // ✅ نمایش دکمه Continue فقط وقتی هر دو اوکی باشند
+        bottomNavigationBar: Obx(() {
+          final allOk =
+              checkServerController.serverOk.value &&
+              checkServerController.currentPosition.value != null;
+
+          if (!allOk) return const SizedBox();
+
+          return Padding(
+            padding: const EdgeInsets.only(left: 30, right: 30, bottom: 15),
+            child: MyButton(
+              isFocus: true,
+              buttonText: 'continue'.tr,
+              onTap: _goNext,
+            ),
+          );
+        }),
         backgroundColor: Colors.transparent,
         body: Center(
           child: SingleChildScrollView(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Obx(
-                  () => _buildCard(
-                    title: "ارتباط با سرور",
-                    description: checkServerController.message.value,
-                    isOk: checkServerController.serverOk.value,
-                    onCheck: checkServerController.checkServerConnection,
-                    guideText: "راهنما",
-                    isLoading: checkServerController.serverLoading.value,
-                  ),
-                ),
-                Obx(
-                  () => _buildCard(
-                    title: "موقعیت مکانی",
-                    description:
-                        "برای تشخیص موقعیت شما، لطفاً GPS را فعال کنید.",
-                    isOk: checkServerController.currentPosition.value != null,
-                    onCheck: checkServerController.checkLocation,
-                    guideText: "راهنما",
-                    isLoading: checkServerController.locationLoading.value,
-                  ),
-                ),
+                // ✅ کارت سرور
+                Obx(() {
+                  final ctrl = checkServerController;
+                  return _buildCard(
+                    title: "server_connection".tr,
+                    description: ctrl.message.value.isNotEmpty
+                        ? ctrl.message.value
+                        : "در حال بررسی اتصال به سرور...",
+                    isOk: ctrl.serverOk.value,
+                    onCheck: ctrl.checkServerConnection,
+                    guideText: "help".tr,
+                    showGuide:
+                        !ctrl.serverOk.value, // ✅ اگر اوکی نبود راهنما نشون بده
+                    isLoading: ctrl.serverLoading.value,
+                  );
+                }),
+
+                // ✅ کارت لوکیشن
+                Obx(() {
+                  final ctrl = checkServerController;
+                  String desc = "location_gps_message".tr;
+                  if (ctrl.locationErrorMessage.value.isNotEmpty) {
+                    desc = ctrl
+                        .locationErrorMessage
+                        .value; // ✅ متن خطا جایگزین میشه
+                  }
+
+                  return _buildCard(
+                    title: "location".tr,
+                    description: desc,
+                    isOk: ctrl.currentPosition.value != null,
+                    onCheck: ctrl.checkLocation,
+                    guideText: "help".tr,
+                    showGuide:
+                        ctrl.currentPosition.value == null, // ✅ در صورت خطا
+                    isLoading: ctrl.locationLoading.value,
+                  );
+                }),
+
                 _buildInstallCard(),
               ],
             ),

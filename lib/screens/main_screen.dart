@@ -31,7 +31,7 @@ class MainScreen extends StatelessWidget {
           shape: const CircleBorder(),
           child: Icon(Icons.qr_code, color: theme.colorScheme.onPrimary),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
         backgroundColor: theme.colorScheme.primary,
 
         /// ترکیب lazy load و نگه‌داری MapScreen

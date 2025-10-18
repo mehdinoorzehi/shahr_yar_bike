@@ -1,199 +1,242 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:bike/helper/go_to_check_screen.dart';
+import 'package:bike/helper/location_helper.dart';
+import 'package:bike/langs/translation_service.dart';
 import 'package:bike/widgets/toast.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:get/get.dart';
 
 class ApiService {
   static const String baseUrl = 'https://bike.sirjan.ir/demo/api';
 
-  /// درخواست POST
+  // 📦 ساخت هدرها
+  static Future<Map<String, String>> _buildHeaders() async {
+    String appVersion = 'unknown';
+    try {
+      final info = await PackageInfo.fromPlatform();
+      appVersion = info.version;
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ خطا در دریافت نسخه اپ: $e');
+      }
+    }
+
+    String locale = 'fa';
+    try {
+      locale = Get.find<TranslationService>().currentLocale.value.languageCode;
+    } catch (_) {}
+
+    String location = '';
+    try {
+      final pos = await safeGetCurrentPosition();
+      if (pos != null) {
+        location = '${pos.latitude},${pos.longitude}';
+      }
+    } catch (_) {}
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'APP_VERSION': appVersion,
+      'LOCALE': locale,
+      'LOCATION': location,
+    };
+
+    if (kDebugMode) {
+      print('📤 [HEADERS] →');
+    }
+    // ignore: avoid_print
+    headers.forEach((k, v) => print('   $k: $v'));
+
+    return headers;
+  }
+
+  // 🔹 POST
   static Future<dynamic> post(
+
     String endpoint,
     Map<String, dynamic> body,
   ) async {
-    print('🟦 [POST] شروع درخواست → $baseUrl$endpoint');
-    print('📦 بدنه درخواست: $body');
+    if (kDebugMode) {
+      print('🟦 [POST] → $baseUrl$endpoint');
+    }
+    if (kDebugMode) {
+      print('📦 Body: $body');
+    }
     try {
+      final headers = await _buildHeaders();
       final response = await http
           .post(
             Uri.parse(baseUrl + endpoint),
-            headers: {'Content-Type': 'application/json'},
+            headers: headers,
             body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 15));
 
-      print(
-        '🟩 [POST] پاسخ دریافتی از سرور: '
-        'status=${response.statusCode}, body=${response.body}',
-      );
+      if (kDebugMode) {
+        print('🟩 [POST] Response: ${response.statusCode}');
+      }
       return handleResponse(response);
+    } on SocketException {
+      showErrorToast(description: 'اتصال به اینترنت برقرار نیست');
+      return null;
+    } on TimeoutException {
+      showWarningToast(description: 'درخواست شما منقضی شد');
+      return null;
     } catch (e) {
       showErrorToast(description: 'خطا در ارسال داده');
+      return null;
     }
   }
 
-  /// درخواست PUT
+  // 🔹 PUT
   static Future<dynamic> put(String endpoint, Map<String, dynamic> body) async {
-    print('🟦 [PUT] شروع درخواست → $baseUrl$endpoint');
-    print('📦 بدنه درخواست: $body');
+    if (kDebugMode) {
+      print('🟦 [PUT] → $baseUrl$endpoint');
+    }
+    if (kDebugMode) {
+      print('📦 Body: $body');
+    }
     try {
+      final headers = await _buildHeaders();
       final response = await http
           .put(
             Uri.parse(baseUrl + endpoint),
-            headers: {'Content-Type': 'application/json'},
+            headers: headers,
             body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 15));
 
-      print(
-        '🟩 [PUT] پاسخ دریافتی از سرور: '
-        'status=${response.statusCode}, body=${response.body}',
-      );
-      return handleResponse(response);
-    } catch (e) {
-      showErrorToast(description: 'خطا در به‌روزرسانی داده');
-    }
-  }
-
-  /// درخواست DELETE
-  static Future<dynamic> delete(String endpoint) async {
-    print('🟦 [DELETE] شروع درخواست → $baseUrl$endpoint');
-    try {
-      final response = await http
-          .delete(Uri.parse(baseUrl + endpoint))
-          .timeout(const Duration(seconds: 15));
-
-      print(
-        '🟩 [DELETE] پاسخ دریافتی از سرور: '
-        'status=${response.statusCode}, body=${response.body}',
-      );
-      return handleResponse(response);
-    } catch (e) {
-      showErrorToast(description: 'خطا در حذف داده');
-    }
-  }
-
-  /// درخواست GET
-  static Future<dynamic> get(String endpoint) async {
-    print('🟦 [GET] شروع درخواست → $baseUrl$endpoint');
-    try {
-      final response = await http
-          .get(Uri.parse(baseUrl + endpoint))
-          .timeout(const Duration(seconds: 15));
-
-      print(
-        '🟩 [GET] پاسخ دریافتی از سرور: '
-        'status=${response.statusCode}, body=${response.body}',
-      );
-
-      // 👇 بررسی پاسخ و بازگرداندن بدنه
+      if (kDebugMode) {
+        print('🟩 [PUT] Response: ${response.statusCode}');
+      }
       return handleResponse(response);
     } on SocketException {
-      showErrorToast(description: 'عدم اتصال به اینترنت');
+      showErrorToast(description: 'اتصال به اینترنت برقرار نیست');
+      return null;
     } on TimeoutException {
-      showWarningToast(
-        description: 'درخواست شما منقضی شد، لطفاً دوباره تلاش کنید',
-      );
-    } on HttpException {
-      showErrorToast(description: 'پاسخ نامعتبر از سرور');
-    } on FormatException {
-      showErrorToast(description: 'فرمت پاسخ اشتباه است');
+      showWarningToast(description: 'درخواست شما منقضی شد');
+      return null;
     } catch (e) {
-      showErrorToast(description: e.toString());
+      showErrorToast(description: 'خطا در به‌روزرسانی داده');
+      return null;
     }
   }
 
-  /// بررسی پاسخ سرور
+  // 🔹 DELETE
+  static Future<dynamic> delete(String endpoint) async {
+    if (kDebugMode) {
+      print('🟦 [DELETE] → $baseUrl$endpoint');
+    }
+    try {
+      final headers = await _buildHeaders();
+      final response = await http
+          .delete(Uri.parse(baseUrl + endpoint), headers: headers)
+          .timeout(const Duration(seconds: 15));
+
+      if (kDebugMode) {
+        print('🟩 [DELETE] Response: ${response.statusCode}');
+      }
+      return handleResponse(response);
+    } on SocketException {
+      showErrorToast(description: 'اتصال به اینترنت برقرار نیست');
+      return null;
+    } on TimeoutException {
+      showWarningToast(description: 'درخواست شما منقضی شد');
+      return null;
+    } catch (e) {
+      showErrorToast(description: 'خطا در حذف داده');
+      return null;
+    }
+  }
+
+  // 🔹 GET
+  static Future<dynamic> get(String endpoint) async {
+    if (kDebugMode) {
+      print('🟦 [GET] → $baseUrl$endpoint');
+    }
+    try {
+      final headers = await _buildHeaders();
+      final response = await http
+          .get(Uri.parse(baseUrl + endpoint), headers: headers)
+          .timeout(const Duration(seconds: 15));
+
+      if (kDebugMode) {
+        print('🟩 [GET] Response: ${response.statusCode}');
+      }
+      return handleResponse(response);
+    } on SocketException {
+      showErrorToast(description: 'اتصال اینترنت برقرار نیست');
+      return null;
+    } on TimeoutException {
+      showWarningToast(description: 'درخواست منقضی شد');
+      return null;
+    } on HttpException {
+      showErrorToast(description: 'پاسخ نامعتبر از سرور');
+      return null;
+    } on FormatException {
+      showErrorToast(description: 'فرمت پاسخ اشتباه است');
+      return null;
+    } catch (e) {
+      showErrorToast(description: 'خطا در دریافت داده ها');
+      return null;
+    }
+  }
+
+  // 🎯 بررسی پاسخ سرور
   static dynamic handleResponse(http.Response response) {
     final statusCode = response.statusCode;
-    final body = response.body.isNotEmpty ? jsonDecode(response.body) : null;
+    dynamic body;
 
-    print('📬 [ResponseHandler] status=$statusCode, body=$body');
+    try {
+      body = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+    } catch (e) {
+      body = {'message': 'پاسخ نامعتبر از سرور'};
+    }
 
-    final serverMessage = body?['message']?.toString() ?? '';
+    final message = body['message']?.toString().tr ?? '';
 
-    // 🔹 نمایش پیام در هر حالت
     switch (statusCode) {
       case 200:
       case 201:
-        showSuccessToast(
-          description: serverMessage.isNotEmpty
-              ? serverMessage
-              : 'عملیات با موفقیت انجام شد',
-        );
+        body['ok'] = true; // ✅ اضافه برای تشخیص موفقیت
         break;
-
-      case 202:
-      case 203:
-        showInfoToast(
-          description: serverMessage.isNotEmpty
-              ? serverMessage
-              : 'درخواست شما در حال پردازش است',
-        );
-        break;
-
       case 400:
         showWarningToast(
-          description: serverMessage.isNotEmpty
-              ? serverMessage
-              : 'درخواست نامعتبر',
+          description: message.isNotEmpty ? message : 'درخواست نامعتبر',
         );
         break;
-
       case 401:
         showErrorToast(
-          description: serverMessage.isNotEmpty
-              ? serverMessage
-              : 'دسترسی غیرمجاز',
+          description: message.isNotEmpty ? message : 'دسترسی غیرمجاز',
         );
         break;
-
       case 403:
         showErrorToast(
-          description: serverMessage.isNotEmpty
-              ? serverMessage
-              : 'شما اجازه دسترسی ندارید',
+          description: message.isNotEmpty ? message : 'اجازه دسترسی ندارید',
         );
         break;
-
       case 404:
         showWarningToast(
-          description: serverMessage.isNotEmpty
-              ? serverMessage
-              : 'موردی یافت نشد',
+          description: message.isNotEmpty ? message : 'موردی یافت نشد',
         );
         break;
-
-      case 408:
-        showWarningToast(
-          description: serverMessage.isNotEmpty
-              ? serverMessage
-              : 'درخواست منقضی شد',
-        );
-        break;
-
       case 500:
       case 502:
       case 503:
       case 504:
-        showErrorToast(
-          description: serverMessage.isNotEmpty
-              ? serverMessage
-              : 'خطای سرور، لطفاً بعداً دوباره تلاش کنید',
+        goToCheckScreen(
+          message.isNotEmpty ? message : 'خطای سرور، لطفاً دوباره تلاش کنید',
         );
         break;
-
       default:
-        showWarningToast(
-          description: serverMessage.isNotEmpty
-              ? serverMessage
-              : 'خطای ناشناخته',
-        );
+        showWarningToast(description: 'خطای ناشناخته');
         break;
     }
 
-    // ✅ بدنه پاسخ را در همه حالت‌ها برگردان
     return body;
   }
 }

@@ -71,7 +71,7 @@ class _SearchBoxState extends State<SearchBox> {
                   MyTextFeild(
                     controller: widget._stationNameController,
                     labelText: 'نام ایستگاه',
-                    suffoxIcon: const Icon(Icons.directions_bike),
+                    suffixIcon: const Icon(Icons.directions_bike),
                     onChanged: (value) {
                       widget.controller.stations.refresh();
                     },

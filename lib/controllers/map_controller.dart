@@ -1,25 +1,27 @@
+// map_controller_getx_optimized.dart
 import 'dart:async';
-import 'package:bike/app_routes.dart';
+import 'package:bike/helper/location_helper.dart';
 import 'package:bike/screens/map/widgets/station_bottom_sheet.dart';
 import 'package:bike/models/models.dart';
 import 'package:bike/widgets/pulsing_user_dot.dart';
-import 'package:bike/widgets/toast.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:rxdart/rxdart.dart'; // برای debounce
 
 class MapControllerX extends GetxController {
   final MapController mapController = MapController();
-  var isLoading = false.obs;
-  final RxBool showSearchBox = false.obs;
+  final isLoading = false.obs;
+  final showSearchBox = false.obs;
   final stations2 = <Station>[].obs;
   final Rxn<Position> currentPosition = Rxn<Position>();
   final markers = <Marker>[].obs;
+
   StreamSubscription<Position>? _positionStreamSub;
 
-  /// ایستگاه‌ها
   final RxList<Station> stations = <Station>[
     Station(
       id: 's1',
@@ -53,7 +55,6 @@ class MapControllerX extends GetxController {
   void onInit() {
     super.onInit();
     initLocation();
-    updateMarkers();
   }
 
   @override
@@ -63,95 +64,78 @@ class MapControllerX extends GetxController {
   }
 
   Future<void> initLocation() async {
-
     try {
-      // گرفتن موقعیت فعلی
-      final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 3),
-        ),
-      );
+      isLoading.value = true;
 
+      final pos = await safeGetCurrentPosition();
+      if (pos == null) {
+        debugPrint('خطا در دریافت موقعیت');
+        return;
+      }
       currentPosition.value = pos;
       _recalculateDistances();
 
-      // استریم موقعیت
+      // ---------- Debounced location stream ----------
       _positionStreamSub?.cancel();
-      _positionStreamSub =
-          Geolocator.getPositionStream(
-            locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.best,
-              distanceFilter: 10,
-            ),
-          ).listen(
-            (position) {
-              currentPosition.value = position;
-              _recalculateDistances();
-            },
-            onError: (e) {
-              debugPrint("❌ خطا در استریم موقعیت: $e");
-              _goToCheckScreen('دسترسی به موقعیت قطع شد');
-            },
-          );
+      _positionStreamSub = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.best,
+          distanceFilter: 10,
+        ),
+      )
+          .debounceTime(const Duration(milliseconds: 300))
+          .listen(
+        (position) {
+          currentPosition.value = position;
+          _recalculateDistances();
+        },
+        onError: (e) {
+          debugPrint("❌ خطا در استریم موقعیت: $e");
+        },
+      );
     } catch (e) {
       debugPrint("❌ خطا در initLocation: $e");
-      _goToCheckScreen('خطا در دریافت موقعیت');
     } finally {
       isLoading.value = false;
     }
   }
 
-  void _goToCheckScreen(String msg) {
-    showErrorToast(description: msg);
-    _positionStreamSub?.cancel();
-    currentPosition.value = null;
-
-    // بستن تمام صفحات و رفتن به صفحه چک
-    Future.microtask(() {
-      if (Get.currentRoute != AppRoutes.checkScreen) {
-        Get.offAllNamed(AppRoutes.checkScreen);
-      }
-    });
+  /// ---------- Marker helpers ----------
+  Marker _buildMarker(Station s) {
+    return Marker(
+      point: LatLng(s.lat, s.lng),
+      width: 65,
+      height: 65,
+      child: GestureDetector(
+        onTap: () => onMarkerTap(Get.context!, s),
+        child: RepaintBoundary(
+          child: s.distanceKm >= 0
+              ? Image.asset(s.iconAsset, width: 44, height: 44)
+              : const SizedBox.shrink(),
+        ),
+      ),
+    );
   }
 
-  /// ساخت مارکرها
-  void updateMarkers() {
-    final list = <Marker>[];
+  Marker _buildUserMarker(Position pos) {
+    return Marker(
+      point: LatLng(pos.latitude, pos.longitude),
+      width: 40,
+      height: 40,
+      child: const RepaintBoundary(child: PulsingUserDot()),
+    );
+  }
 
-    for (var s in stations) {
-      list.add(
-        Marker(
-          point: LatLng(s.lat, s.lng),
-          width: 65,
-          height: 65,
-          child: GestureDetector(
-            onTap: () => onMarkerTap(Get.context!, s),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (s.distanceKm >= 0)
-                  Image.asset(s.iconAsset, width: 44, height: 44),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
+  void updateMarkers({bool force = false}) {
+    final list = stations.map(_buildMarker).toList();
     if (currentPosition.value != null) {
-      final pos = currentPosition.value!;
-      list.add(
-        Marker(
-          point: LatLng(pos.latitude, pos.longitude),
-          width: 40,
-          height: 40,
-          child: const Center(child: PulsingUserDot()),
-        ),
-      );
+      list.add(_buildUserMarker(currentPosition.value!));
     }
 
-    markers.assignAll(list);
+    // rebuild only if changed
+    if (!listEquals(list, markers) || force) {
+      markers.assignAll(list);
+    }
   }
 
   void _recalculateDistances() {
@@ -165,7 +149,8 @@ class MapControllerX extends GetxController {
       final dMeters = distance(userLatLng, LatLng(s.lat, s.lng));
       s.distanceKm = (dMeters / 1000);
       return s;
-    }).toList()..sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
+    }).toList()
+      ..sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
 
     stations.assignAll(updated);
     updateMarkers();

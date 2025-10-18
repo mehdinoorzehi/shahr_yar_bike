@@ -11,17 +11,23 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:toastification/toastification.dart';
+import 'web_update_checker.dart'
+    if (dart.library.io) 'stub.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setUp();
 
-  // مقداردهی اولیه TranslationService
   final translationService = await Get.putAsync(
     () => TranslationService().init(),
   );
 
   runApp(MyApp(translationService: translationService));
+
+  // فقط در وب
+  if (kIsWeb) {
+    setupWebUpdateChecker();
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -67,7 +73,9 @@ class MyApp extends StatelessWidget {
                     initialRoute: AppRoutes.languageSelector,
                     routingCallback: (routing) {
                       if (routing != null && kDebugMode) {
-                        print("Navigated to ${routing.current}");
+                        if (kDebugMode) {
+                          print("Navigated to ${routing.current}");
+                        }
                       }
                     },
                   );
@@ -85,12 +93,12 @@ class MyApp extends StatelessWidget {
                           borderRadius: borderRadius,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: Colors.black.withValues(alpha: 0.08),
                               blurRadius: 40,
                               offset: const Offset(0, 16),
                             ),
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
+                              color: Colors.black.withValues(alpha: 0.03),
                               blurRadius: 10,
                               offset: const Offset(0, 2),
                             ),

@@ -1,6 +1,6 @@
 import 'dart:async';
-
 import 'package:bike/app_routes.dart';
+import 'package:bike/controllers/authentication_controller.dart';
 import 'package:bike/screens/auth/login_screen.dart';
 import 'package:bike/theme/app_colors.dart';
 import 'package:bike/widgets/animated_background.dart';
@@ -8,9 +8,9 @@ import 'package:bike/widgets/button.dart';
 import 'package:bike/widgets/textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:get/get_navigation/get_navigation.dart';
-import 'package:get/instance_manager.dart';
+import 'package:get/get.dart';
 import 'dart:math' as math;
+import 'package:bike/extensions/translation_extension.dart';
 
 class OtpScreen extends StatelessWidget {
   const OtpScreen({super.key});
@@ -18,6 +18,81 @@ class OtpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
+    final authController = Get.find<AuthenticationController>();
+
+    // 🟢 اگر متد از نوع sms_from_user است:
+    if (authController.selectedMethod.value == 'sms_from_user') {
+      return Scaffold(
+        body: AnimatedBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Center(
+                    child: Icon(
+                      LucideIcons.smartphone,
+                      color: Colors.white,
+                      size: 80,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  Center(
+                    child: Text(
+                      'verification_code_display'.trNamed({
+                        'provider_number': authController.providerNumber.value,
+                      }),
+                      style: themeData.textTheme.titleMedium!.copyWith(
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: Text(
+                      authController.userCode.value,
+                      style: const TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+                  Center(
+                    child: Text(
+                      "after_sending_code_press_check".tr,
+                      style: themeData.textTheme.titleMedium!.copyWith(
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+
+                  MyButton(
+                    isFocus: true,
+                    buttonText: "check".tr,
+                    onTap: () => Get.offAllNamed(AppRoutes.home),
+                  ),
+                  const SizedBox(height: 110),
+
+                  // ✅ نکات پایین فرم
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [..._buildOtpTips(themeData)],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: AnimatedBackground(
@@ -26,17 +101,17 @@ class OtpScreen extends StatelessWidget {
             Container(
               alignment: Alignment.bottomRight,
               padding: const EdgeInsets.only(bottom: 20, right: 40, left: 40),
-              height: 200,
+              height: 70,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
 
                 children: [
                   Text(
-                    'کد پیامکی',
+                    'sms_code'.tr,
                     textDirection: TextDirection.rtl,
                     style: TextStyle(
                       color: themeData.colorScheme.onPrimary,
-                      fontSize: 23,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -72,7 +147,9 @@ class OtpScreen extends StatelessWidget {
                       children: [
                         Center(
                           child: Text(
-                            'لطفا کد ارسال شده به شماره 09140750087 را وارد کنید',
+                            'verification_code_sent'.trNamed({
+                              'number': authController.phoneController.text,
+                            }),
                             textAlign: TextAlign.center,
                             style: themeData.textTheme.titleSmall!.apply(
                               color: themeData.colorScheme.onPrimary,
@@ -81,10 +158,11 @@ class OtpScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        const Center(
+                        Center(
                           child: SizedBox(
                             width: 200,
                             child: MyTextFeild(
+                              controller: authController.otpController,
                               maxLength: 6,
                               textDirection: TextDirection.ltr,
                               keyboardType: TextInputType.number,
@@ -93,14 +171,13 @@ class OtpScreen extends StatelessWidget {
                           ),
                         ),
 
-                        const SizedBox(height: 20),
-                        ResendCodeCircle(
-                          seconds: 120,
-                          onResend: () {
-                            // 🔥 ارسال مجدد کد
-                          },
-                        ),
-
+                        // const SizedBox(height: 20),
+                        // ResendCodeCircle(
+                        //   seconds: 120,
+                        //   onResend: () async {
+                        //     await authController.requestVerification();
+                        //   },
+                        // ),
                         const SizedBox(height: 20),
 
                         // 🔹 تایمر دایره‌ای وسط
@@ -110,32 +187,35 @@ class OtpScreen extends StatelessWidget {
                             // 🔹 دکمه ویرایش شماره
                             _GlassButton(
                               icon: LucideIcons.pencil,
-                              label: "ویرایش شماره",
+                              label: "edit_number".tr,
                               onTap: () => Get.back(),
                               themeData: themeData,
                             ),
 
                             // 🔹 دکمه ارسال مجدد کد
-                            _GlassButton(
-                              themeData: themeData,
-                              icon: LucideIcons.refresh_cw,
-                              label: "ارسال مجدد کد",
-                              onTap: () {},
+                            Obx(
+                              () => ResendCodeButton(
+                                seconds: authController.remainingTime.value,
+                                onResend: () async {
+                                  await authController.requestVerification();
+                                },
+                              ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 80),
-
-                        MyButton(
-                          isFocus: true,
-                          buttonText: 'ادامه',
-                          onTap: () {
-                            Get.offAllNamed(AppRoutes.home);
-                          },
+                        Obx(
+                          () => MyButton(
+                            isLoading: authController.isLoadingOtp.value,
+                            isFocus: true,
+                            buttonText: 'continue_btn'.tr,
+                            onTap: () async {
+                              await authController.verifyCode();
+                            },
+                          ),
                         ),
-                        const SizedBox(height: 40),
 
-                        const SizedBox(height: 70),
+                        const SizedBox(height: 110),
 
                         // 🔹 دکمه راهنمای ورود موقتاً غیرفعال شد
                         // TextButton.icon(
@@ -144,109 +224,11 @@ class OtpScreen extends StatelessWidget {
                         //   label: Icon(LucideIcons.circle_question_mark),
                         // ),
 
-                        // ✅ نکات جذاب و راست‌چین پایین فرم
+                        // ✅ نکات پایین فرم
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            buildTip("۱. شماره باید با 09 شروع شود", themeData),
-                            const SizedBox(height: 8),
-                            buildTip(
-                              "۲. شماره باید به نام خودتان باشد",
-                              themeData,
-                            ),
-                            const SizedBox(height: 8),
-                            buildTip(
-                              "۳. امکان تغییر شماره موبایل وجود ندارد",
-                              themeData,
-                            ),
-                          ],
+                          children: [..._buildOtpTips(themeData)],
                         ),
-
-                        // // 🔹 راهنمای ورود
-                        // TextButton.icon(
-                        //   onPressed: () {
-                        //     showModalBottomSheet(
-                        //       context: context,
-                        //       shape: const RoundedRectangleBorder(
-                        //         borderRadius: BorderRadius.vertical(
-                        //           top: Radius.circular(20),
-                        //         ),
-                        //       ),
-                        //       builder: (context) => Padding(
-                        //         padding: const EdgeInsets.all(15),
-                        //         child: Column(
-                        //           mainAxisSize: MainAxisSize.min,
-                        //           crossAxisAlignment: CrossAxisAlignment.end,
-                        //           children: [
-                        //             Row(
-                        //               mainAxisAlignment:
-                        //                   MainAxisAlignment.spaceBetween,
-                        //               children: [
-                        //                 IconButton(
-                        //                   onPressed: () {
-                        //                     Get.back();
-                        //                   },
-                        //                   icon: const Icon(
-                        //                     Icons.close,
-                        //                     size: 17,
-                        //                   ),
-                        //                 ),
-                        //                 Text(
-                        //                   "راهنما",
-                        //                   style: themeData
-                        //                       .textTheme
-                        //                       .titleMedium!
-                        //                       .copyWith(
-                        //                         fontWeight: FontWeight.bold,
-                        //                       ),
-                        //                 ),
-                        //               ],
-                        //             ),
-                        //             const SizedBox(height: 12),
-                        //             const Text(
-                        //               "۱. راهنمای یک\n"
-                        //               "۲. راهنمای دو\n"
-                        //               "۳. راهنمای سه",
-                        //               textAlign: TextAlign.start,
-                        //               textDirection: TextDirection.rtl,
-                        //             ),
-                        //             const SizedBox(height: 16),
-                        //             SizedBox(
-                        //               width: double.infinity,
-                        //               child: ElevatedButton(
-                        //                 style: ButtonStyle(
-                        //                   backgroundColor:
-                        //                       WidgetStatePropertyAll(
-                        //                         themeData.colorScheme.primary,
-                        //                       ),
-                        //                 ),
-                        //                 onPressed: () => Navigator.pop(context),
-                        //                 child: Text(
-                        //                   "تایید",
-                        //                   style: TextStyle(
-                        //                     color:
-                        //                         themeData.colorScheme.onPrimary,
-                        //                   ),
-                        //                 ),
-                        //               ),
-                        //             ),
-                        //           ],
-                        //         ),
-                        //       ),
-                        //     );
-                        //   },
-                        //   icon: Text(
-                        //     "راهنما",
-                        //     style: TextStyle(
-                        //       color: themeData.colorScheme.onPrimary,
-                        //     ),
-                        //   ),
-                        //   label: Icon(
-                        //     LucideIcons.circle_question_mark,
-                        //     size: 20,
-                        //     color: themeData.colorScheme.onPrimary,
-                        //   ),
-                        // ),
                       ],
                     ),
                   ),
@@ -260,25 +242,110 @@ class OtpScreen extends StatelessWidget {
   }
 }
 
-class ResendCodeCircle extends StatefulWidget {
-  final int seconds;
-  final VoidCallback onResend;
+class _GlassButton extends StatelessWidget {
+  final IconData? icon; // ✅ قابل null شدن
+  final String label;
+  final VoidCallback onTap;
+  final ThemeData themeData;
 
-  const ResendCodeCircle({
+  const _GlassButton({
+    this.icon,
+    required this.label,
+    required this.onTap,
+    required this.themeData,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedOpacity(
+        opacity: 1,
+        duration: const Duration(milliseconds: 200),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child:  Row(
+                    key: const ValueKey('content'),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (icon != null)
+                        Icon(
+                          icon,
+                          size: 16,
+                          color: themeData.colorScheme.onPrimary,
+                        ),
+                      const SizedBox(width: 6),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: themeData.colorScheme.onPrimary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+List<Widget> _buildOtpTips(ThemeData themeData) {
+  List<Widget> tips = [];
+  int index = 1;
+
+  while (true) {
+    final key = 'login_verify_help_$index';
+    final text = key.tr;
+
+    // اگر کلید خالی یا برابر کلید خودش بود یعنی ترجمه وجود نداره → توقف
+    if (text.isEmpty || text == key) break;
+
+    tips.add(buildTip(text, themeData));
+    tips.add(const SizedBox(height: 8));
+
+    index++;
+  }
+
+  return tips;
+}
+
+class ResendCodeButton extends StatefulWidget {
+  final int seconds;
+  final Future<void> Function() onResend;
+
+  const ResendCodeButton({
     super.key,
-    this.seconds = 60,
+    required this.seconds,
     required this.onResend,
   });
 
   @override
-  State<ResendCodeCircle> createState() => _ResendCodeCircleState();
+  State<ResendCodeButton> createState() => _ResendCodeButtonState();
 }
 
-class _ResendCodeCircleState extends State<ResendCodeCircle>
+class _ResendCodeButtonState extends State<ResendCodeButton>
     with SingleTickerProviderStateMixin {
   late int _remaining;
   Timer? _timer;
-  late AnimationController _rotationController;
+  late AnimationController _gradientController;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -286,16 +353,25 @@ class _ResendCodeCircleState extends State<ResendCodeCircle>
     _remaining = widget.seconds;
     _startTimer();
 
-    // کنترل چرخش دایره‌ی بیرونی
-    _rotationController = AnimationController(
+    _gradientController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 5),
+      duration: const Duration(seconds: 3),
     )..repeat();
   }
 
+  @override
+  void didUpdateWidget(covariant ResendCodeButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // اگر مقدار ثانیه از کنترلر بیرونی تغییر کند
+    if (oldWidget.seconds != widget.seconds) {
+      _remaining = widget.seconds;
+      _startTimer();
+    }
+  }
+
   void _startTimer() {
-    _remaining = widget.seconds;
     _timer?.cancel();
+    if (_remaining <= 0) return;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remaining == 0) {
         timer.cancel();
@@ -309,192 +385,115 @@ class _ResendCodeCircleState extends State<ResendCodeCircle>
   @override
   void dispose() {
     _timer?.cancel();
-    _rotationController.dispose();
+    _gradientController.dispose();
     super.dispose();
   }
 
-  void _resend() {
-    widget.onResend();
-    _startTimer();
+  Future<void> _handleTap() async {
+    if (_remaining == 0 && !_isLoading) {
+      setState(() => _isLoading = true);
+
+      try {
+        await widget.onResend();
+        // وقتی درخواست موفق بود، زمان دوباره از نو شروع بشه
+        _remaining = widget.seconds;
+        _startTimer();
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final progress = 1 - (_remaining / widget.seconds);
+    final theme = Theme.of(context);
+    final isActive = _remaining == 0 && !_isLoading;
 
-    return Center(
-      child: SizedBox(
-        width: 80,
-        height: 80,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // ✅ انیمیشن چرخشی حلقه‌ی بیرونی
-            RotationTransition(
-              turns: _rotationController,
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: progress),
-                duration: const Duration(milliseconds: 600),
-                builder: (context, value, _) {
-                  return CustomPaint(
-                    painter: _CircleTimerPainter(
-                      progress: value,
-                      color1: const Color(0xFF00E5FF), // آبی فیروزه‌ای
-                      color2: kPurple, // سبز نئون
-                    ),
-                    child: const SizedBox.expand(),
-                  );
-                },
-              ),
-            ),
-
-            // ✅ محتوای وسط (ثابت)
-            InkWell(
-              onTap: _remaining == 0 ? _resend : null,
-              borderRadius: BorderRadius.circular(80),
-              child: Container(
-                width: 68,
-                height: 68,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _remaining == 0
-                      ? kPurple
-                      : Colors.white.withValues(alpha: 0.08),
-                  boxShadow: [
-                    if (_remaining == 0)
-                      BoxShadow(
-                        color: kPurple.withValues(alpha: 0.5),
-                        blurRadius: 20,
-                        spreadRadius: 2,
-                      ),
-                  ],
-                ),
-                child: _remaining == 0
-                    ? const Icon(
-                        Icons.refresh_rounded,
-                        color: Colors.white,
-                        size: 28,
-                      )
-                    : Text(
-                        _remaining.toString(),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CircleTimerPainter extends CustomPainter {
-  final double progress;
-  final Color color1;
-  final Color color2;
-
-  _CircleTimerPainter({
-    required this.progress,
-    required this.color1,
-    required this.color2,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final strokeWidth = 6.0;
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width / 2) - strokeWidth / 2;
-
-    // دایره خاکستری پس‌زمینه
-    final bgPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.1)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
-
-    // دایره متحرک رنگی
-    final gradient = SweepGradient(
-      colors: [color1, color2, color1],
-      stops: const [0.0, 0.6, 1.0],
-    );
-
-    final progressPaint = Paint()
-      ..shader = gradient.createShader(
-        Rect.fromCircle(center: center, radius: radius),
-      )
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = strokeWidth;
-
-    // کشیدن پس‌زمینه
-    canvas.drawCircle(center, radius, bgPaint);
-
-    // کشیدن قوس زمان
-    final startAngle = -math.pi / 2;
-    final sweepAngle = 2 * math.pi * progress;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      sweepAngle,
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _CircleTimerPainter oldDelegate) =>
-      oldDelegate.progress != progress;
-}
-
-class _GlassButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final ThemeData themeData;
-
-  const _GlassButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    required this.themeData,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+      onTap: isActive ? _handleTap : null,
+      child: AnimatedBuilder(
+        animation: _gradientController,
+        builder: (context, child) {
+          final animationValue = _gradientController.value;
+          final angle = animationValue * 2 * math.pi;
+
+          final gradient = LinearGradient(
+            colors: isActive
+                ? [kPurple, kBlue]
+                : [
+                    Colors.white.withValues(alpha:0.15),
+                    Colors.white.withValues(alpha:0.05),
+                  ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            transform: GradientRotation(angle),
+          );
+
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withValues(alpha:0.2)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha:0.15),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 16, color: themeData.colorScheme.onPrimary),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: themeData.colorScheme.onPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isActive
+                            ? Icons.refresh_rounded
+                            : Icons.lock_clock_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      isActive
+                          ? Text(
+                              "resend_code".tr,
+                              style: theme.textTheme.bodyMedium!.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          : Row(
+                              children: [
+                                Text(
+                                  "$_remaining",
+                                  style: theme.textTheme.bodyMedium!.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(width: 10.0),
+                                Text(
+                                  "senconds_until_resend".tr,
+                                  style: theme.textTheme.bodyMedium!.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ],
+                  ),
+          );
+        },
       ),
     );
   }
