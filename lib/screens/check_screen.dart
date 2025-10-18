@@ -252,9 +252,7 @@ class _CheckScreenState extends State<CheckScreen> {
                 Obx(() {
                   final ctrl = checkServerController;
                   final hasError = ctrl.locationErrorMessage.value.isNotEmpty;
-                  final desc = hasError
-                      ? ctrl.locationErrorMessage.value
-                      : "checked".tr;
+                  final desc = hasError ? ctrl.locationErrorMessage.value : '';
 
                   return _buildCard(
                     title: "location".tr,

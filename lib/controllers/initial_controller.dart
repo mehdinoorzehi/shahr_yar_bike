@@ -165,16 +165,16 @@ class InitialController extends GetxController {
     }
   }
 
-String getOnboardingImagePath(int index) {
-  final translated = 'onboarding_pic_${index + 1}'.tr;
-  if (translated.isEmpty || translated.startsWith('onboarding_')) return '';
-  return translated;
-}
+  String getOnboardingImagePath(int index) {
+    final translated = 'onboarding_pic_${index + 1}'.tr;
+    if (translated.isEmpty || translated.startsWith('onboarding_')) return '';
+    return translated;
+  }
 
-bool isNetworkImage(int index) {
-  final translated = 'onboarding_pic_${index + 1}'.tr;
-  return translated.startsWith('http');
-}
+  bool isNetworkImage(int index) {
+    final translated = 'onboarding_pic_${index + 1}'.tr;
+    return translated.startsWith('http');
+  }
 
   @override
   void onClose() {
