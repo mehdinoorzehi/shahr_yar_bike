@@ -84,102 +84,113 @@ class _Login extends GetView<InitialController> {
       }
 
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 🔹 توضیحات
-          Center(
-            child: Text(
-              'login_description'.tr,
-              style: themeData.textTheme.titleSmall?.copyWith(
-                color: themeData.colorScheme.onPrimary,
-                fontSize: 15,
+          // 🔹 بخش اسکرول‌شونده
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // توضیحات
+                  Center(
+                    child: Text(
+                      'login_description'.tr,
+                      style: themeData.textTheme.titleSmall?.copyWith(
+                        color: themeData.colorScheme.onPrimary,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+
+                  // فیلد شماره تلفن
+                  MyTextFeild(
+                    controller: authController.phoneController,
+                    keyboardType: TextInputType.phone,
+                    suffixIcon: Icon(
+                      LucideIcons.phone,
+                      color: themeData.colorScheme.onPrimary,
+                    ),
+                    hintText: 'phone_placeholder'.tr,
+                    hintTextDirection: TextDirection.ltr,
+                    textDirection: TextDirection.ltr,
+                    maxLength: 11,
+                    enableValidation: true,
+                    validator: (value) {
+                      if (value.isEmpty) return 'نباید خالی باشد';
+                      if (!value.startsWith('09'))
+                        return 'شماره باید با 09 شروع شود';
+                      if (value.length != 11) return 'شماره باید 11 رقم باشد';
+                      return '';
+                    },
+                  ),
+                  const SizedBox(height: 25),
+
+                  // لیست متدهای تأیید (در صورت وجود)
+                  if (controller.methods.length > 1)
+                    ...controller.methods.map((method) {
+                      final isSelected =
+                          controller.selectedMethod.value?.method ==
+                          method.method;
+                      return GestureDetector(
+                        onTap: () => controller.selectedMethod(method),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              Radio<VerificationMethod>(
+                                value: method,
+                                groupValue: controller.selectedMethod.value,
+                                onChanged: (val) {
+                                  if (val != null)
+                                    controller.selectedMethod(val);
+                                },
+                                activeColor: themeData.colorScheme.onPrimary,
+                                fillColor: WidgetStateProperty.resolveWith((
+                                  states,
+                                ) {
+                                  return states.contains(WidgetState.selected)
+                                      ? themeData.colorScheme.onPrimary
+                                      : Colors.white;
+                                }),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  'verification_method.${method.method}'.tr,
+                                  style: TextStyle(
+                                    color: themeData.colorScheme.onPrimary,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  const SizedBox(height: 30),
+
+                  // دکمه لاگین
+                  MyButton(
+                    isLoading: authController.isLoadingLogin.value,
+                    buttonText: 'login_button'.tr,
+                    isFocus: true,
+                    onTap: () async {
+                      authController.selectedMethod.value =
+                          controller.selectedMethod.value?.method ?? '';
+                      await authController.requestVerification();
+                    },
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 30),
 
-          // 🔹 فیلد شماره تلفن
-          MyTextFeild(
-            controller: authController.phoneController,
-            keyboardType: TextInputType.phone,
-            suffixIcon: Icon(
-              LucideIcons.phone,
-              color: themeData.colorScheme.onPrimary,
-            ),
-            hintText: 'phone_placeholder'.tr,
-            hintTextDirection: TextDirection.ltr,
-            textDirection: TextDirection.ltr,
-            maxLength: 11,
-            enableValidation: true,
-            validator: (value) {
-              if (value.isEmpty) return 'نباید خالی باشد';
-              if (!value.startsWith('09')) return 'شماره باید با 09 شروع شود';
-              if (value.length != 11) return 'شماره باید 11 رقم باشد';
-              return '';
-            },
-          ),
-          const SizedBox(height: 25),
-
-          // 🔹 لیست متدهای تأیید (در صورت وجود)
-          if (controller.methods.length > 1)
-            ...controller.methods.map((method) {
-              final isSelected =
-                  controller.selectedMethod.value?.method == method.method;
-              return GestureDetector(
-                onTap: () => controller.selectedMethod(method),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    children: [
-                      Radio<VerificationMethod>(
-                        value: method,
-                        // ignore: deprecated_member_use
-                        groupValue: controller.selectedMethod.value,
-                        // ignore: deprecated_member_use
-                        onChanged: (val) {
-                          if (val != null) controller.selectedMethod(val);
-                        },
-                        activeColor: themeData.colorScheme.onPrimary,
-                        fillColor: WidgetStateProperty.resolveWith((states) {
-                          return states.contains(WidgetState.selected)
-                              ? themeData.colorScheme.onPrimary
-                              : Colors.white;
-                        }),
-                      ),
-                      Expanded(
-                        child: Text(
-                          'verification_method.${method.method}'.tr,
-                          style: TextStyle(
-                            color: themeData.colorScheme.onPrimary,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          const SizedBox(height: 30),
-
-          // 🔹 دکمه لاگین
-          MyButton(
-            isLoading: authController.isLoadingLogin.value,
-            buttonText: 'login_button'.tr,
-            isFocus: true,
-            onTap: () async {
-              authController.selectedMethod.value =
-                  controller.selectedMethod.value?.method ?? '';
-              await authController.requestVerification();
-            },
-          ),
-
-          const Spacer(),
-
-          // 🔹 نکات پایین صفحه
+          // 🔹 نکات پایین صفحه (ثابت)
           _buildTipsSection(themeData),
         ],
       );
@@ -189,9 +200,8 @@ class _Login extends GetView<InitialController> {
   Widget _buildTipsSection(ThemeData themeData) {
     final tips = _buildLoginTips(themeData);
     return Column(
-      // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 40),
+        // const SizedBox(height: 30),
         Divider(color: themeData.colorScheme.onPrimary.withValues(alpha: 0.3)),
         const SizedBox(height: 16),
         ...tips,
@@ -200,12 +210,11 @@ class _Login extends GetView<InitialController> {
   }
 }
 
-// ✅ ساخت ویجت نکات
+// ✅ نکات
 Widget buildTip(String text, ThemeData themeData) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 8),
     child: Row(
-      // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
           LucideIcons.circle_check,
@@ -216,7 +225,6 @@ Widget buildTip(String text, ThemeData themeData) {
         Expanded(
           child: Text(
             text,
-            // textDirection: TextDirection.rtl,
             style: themeData.textTheme.bodyMedium?.copyWith(
               color: themeData.colorScheme.onPrimary.withValues(alpha: 0.8),
               height: 1.5,

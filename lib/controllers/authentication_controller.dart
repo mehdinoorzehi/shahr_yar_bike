@@ -19,9 +19,7 @@ class AuthenticationController extends GetxController {
 
   final RxString selectedMethod = ''.obs;
 
-final RxInt remainingTime = 120.obs; // مقدار پیش‌فرض
-
-  
+  final RxInt remainingTime = 120.obs; // مقدار پیش‌فرض
 
   // -------------------- 🚀 /auth/request --------------------
   Future<void> requestVerification() async {

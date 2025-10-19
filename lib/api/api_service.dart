@@ -171,7 +171,7 @@ class ApiService {
       showErrorToast(description: 'اتصال اینترنت برقرار نیست');
       return null;
     } on TimeoutException {
-      showWarningToast(description: 'درخواست منقضی شد');
+      showWarningToast(description: 'درخواست منقضی شد لطفا دوباره تلاش کنید');
       return null;
     } on HttpException {
       showErrorToast(description: 'پاسخ نامعتبر از سرور');

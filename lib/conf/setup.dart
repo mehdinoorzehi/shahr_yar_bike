@@ -7,13 +7,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:get/get.dart';
+import 'package:pwa_install/pwa_install.dart';
 
 // import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> setUp() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  // ✅ مقداردهی اولیه PWAInstall
+  PWAInstall().setup(installCallback: () {
+    debugPrint('APP INSTALLED!');
+  });
   //! change status bar color
 
   SystemChrome.setSystemUIOverlayStyle(

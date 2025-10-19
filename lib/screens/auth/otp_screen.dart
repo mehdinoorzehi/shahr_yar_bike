@@ -5,6 +5,7 @@ import 'package:bike/theme/app_colors.dart';
 import 'package:bike/widgets/animated_background.dart';
 import 'package:bike/widgets/button.dart';
 import 'package:bike/widgets/textfield.dart';
+import 'package:bike/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:get/get.dart';
@@ -19,7 +20,39 @@ class OtpScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final authController = Get.find<AuthenticationController>();
 
-    // 🔹 حالت نمایش فقط کد برای ارسال از کاربر
+    // 🔹 بررسی: اگر شماره پاک شده (مثلاً بعد از refresh)
+    if (authController.phoneController.text.isEmpty) {
+      return Scaffold(
+        body: SafeArea(
+          child: AnimatedBackground(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.amber,
+                    size: 60,
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'برای ادامه، لطفاً دوباره وارد شوید',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  const SizedBox(height: 20),
+                  MyButton(
+                    buttonText: 'بازگشت به ورود',
+                    onTap: () => Get.toNamed(AppRoutes.login),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // 🔹 حالت خاص: نمایش کد برای ارسال توسط کاربر
     if (authController.selectedMethod.value == 'sms_from_user') {
       return Scaffold(
         body: SafeArea(
@@ -79,7 +112,7 @@ class OtpScreen extends StatelessWidget {
       );
     }
 
-    // 🔹 حالت عادی OTP
+    // 🔹 حالت عادی (OTP Code Input)
     return Scaffold(
       body: SafeArea(
         child: AnimatedBackground(
@@ -87,11 +120,11 @@ class OtpScreen extends StatelessWidget {
             builder: (context, constraints) {
               return Column(
                 children: [
-                  // 🔹 عنوان
+                  // 🔹 عنوان صفحه
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 32,
-                      vertical: 20,
+                      vertical: 24,
                     ),
                     child: Align(
                       alignment: Alignment.centerRight,
@@ -106,7 +139,7 @@ class OtpScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // 🔹 بخش محتوای اصلی
+                  // 🔹 محتوای اصلی (قابل اسکرول)
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
@@ -120,82 +153,100 @@ class OtpScreen extends StatelessWidget {
                           width: 1.2,
                         ),
                       ),
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(32, 48, 32, 32),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(28, 36, 28, 20),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // 🔹 توضیح بالای فرم
-                            Center(
-                              child: Text(
-                                'verification_code_sent'.trNamed({
-                                  'number': authController.phoneController.text,
-                                }),
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.titleSmall?.apply(
-                                  color: theme.colorScheme.onPrimary,
-                                  fontSizeFactor: 1.1,
+                            // 🔹 بخش اسکرول‌پذیر بالای فرم
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Center(
+                                      child: Text(
+                                        'verification_code_sent'.trNamed({
+                                          'number': authController
+                                              .phoneController
+                                              .text,
+                                        }),
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.titleSmall
+                                            ?.apply(
+                                              color:
+                                                  theme.colorScheme.onPrimary,
+                                              fontSizeFactor: 1.1,
+                                            ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 30),
+
+                                    // 🔹 فیلد کد
+                                    Center(
+                                      child: SizedBox(
+                                        width: 200,
+                                        child: MyTextFeild(
+                                          controller:
+                                              authController.otpController,
+                                          maxLength: 6,
+                                          textDirection: TextDirection.ltr,
+                                          keyboardType: TextInputType.number,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 35),
+
+                                    // 🔹 دکمه‌های ویرایش و ارسال مجدد
+                                    Wrap(
+                                      spacing: 12,
+                                      runSpacing: 12,
+                                      alignment: WrapAlignment.center,
+                                      children: [
+                                        _GlassButton(
+                                          icon: LucideIcons.pencil,
+                                          label: "edit_number".tr,
+                                          onTap: () => Get.back(),
+                                          themeData: theme,
+                                        ),
+                                        Obx(
+                                          () => ResendCodeButton(
+                                            seconds: authController
+                                                .remainingTime
+                                                .value,
+                                            onResend: () async {
+                                              showWarningToast(
+                                                description:
+                                                    'شماره موبایل وارد شده نادرست است',
+                                              );
+                                              await authController
+                                                  .requestVerification();
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 60),
+
+                                    // 🔹 دکمه ادامه
+                                    Obx(
+                                      () => MyButton(
+                                        isLoading:
+                                            authController.isLoadingOtp.value,
+                                        isFocus: true,
+                                        buttonText: 'continue_btn'.tr,
+                                        onTap: () async {
+                                          await authController.verifyCode();
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 30),
 
-                            // 🔹 فیلد وارد کردن کد
-                            Center(
-                              child: SizedBox(
-                                width: 200,
-                                child: MyTextFeild(
-                                  controller: authController.otpController,
-                                  maxLength: 6,
-                                  textDirection: TextDirection.ltr,
-                                  keyboardType: TextInputType.number,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 35),
-
-                            // 🔹 دو دکمه (ویرایش و ارسال مجدد) واکنش‌گرا
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 12,
-                              alignment: WrapAlignment.center,
-                              children: [
-                                _GlassButton(
-                                  icon: LucideIcons.pencil,
-                                  label: "edit_number".tr,
-                                  onTap: () => Get.back(),
-                                  themeData: theme,
-                                ),
-                                Obx(
-                                  () => ResendCodeButton(
-                                    seconds: authController.remainingTime.value,
-                                    onResend: () async {
-                                      await authController
-                                          .requestVerification();
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 60),
-
-                            // 🔹 دکمه ادامه
-                            Obx(
-                              () => MyButton(
-                                isLoading: authController.isLoadingOtp.value,
-                                isFocus: true,
-                                buttonText: 'continue_btn'.tr,
-                                onTap: () async {
-                                  await authController.verifyCode();
-                                },
-                              ),
-                            ),
-
-                            const SizedBox(height: 100),
-
-                            // 🔹 Divider + نکات پایین صفحه
+                            // 🔹 نکات پایین (ثابت مثل لاگین)
                             _buildTipsSection(theme),
                           ],
                         ),
@@ -211,13 +262,10 @@ class OtpScreen extends StatelessWidget {
     );
   }
 
-  // 🔹 ویجت نکات پایین صفحه (مثل لاگین)
   Widget _buildTipsSection(ThemeData theme) {
     final tips = _buildOtpTips(theme);
     return Column(
-      // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 30),
         Divider(color: theme.colorScheme.onPrimary.withValues(alpha: 0.3)),
         const SizedBox(height: 16),
         ...tips,
@@ -226,7 +274,6 @@ class OtpScreen extends StatelessWidget {
   }
 }
 
-// ✅ ساخت ویجت نکات
 Widget buildTip(String text, ThemeData themeData) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 8),
@@ -414,14 +461,20 @@ class _ResendCodeButtonState extends State<ResendCodeButton>
   Future<void> _handleTap() async {
     if (_remaining == 0 && !_isLoading) {
       setState(() => _isLoading = true);
+      bool success = false;
 
       try {
         await widget.onResend();
-        // وقتی درخواست موفق بود، زمان دوباره از نو شروع بشه
-        _remaining = widget.seconds;
-        _startTimer();
+        success = true; // فقط وقتی بدون خطا انجام شد
+      } catch (e) {
+        success = false;
       } finally {
         if (mounted) setState(() => _isLoading = false);
+      }
+
+      if (success) {
+        _remaining = widget.seconds;
+        _startTimer();
       }
     }
   }

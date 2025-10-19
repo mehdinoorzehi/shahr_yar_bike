@@ -3,8 +3,10 @@ import 'package:bike/controllers/initial_controller.dart';
 import 'package:bike/widgets/animated_background.dart';
 import 'package:bike/widgets/button.dart';
 import 'package:bike/widgets/toast.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pwa_install/pwa_install.dart';
 
 class CheckScreen extends StatefulWidget {
   const CheckScreen({super.key});
@@ -16,6 +18,24 @@ class CheckScreen extends StatefulWidget {
 class _CheckScreenState extends State<CheckScreen> {
   bool appInstalled = false;
   final checkServerController = Get.find<InitialController>();
+
+  bool showInstallCard = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initPwaStatus();
+  }
+
+  Future<void> _initPwaStatus() async {
+    // setup قبلاً در main انجام شده، فقط وضعیت رو چک می‌کنیم
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // اگر قابلیت نصب فعال باشه، یعنی هنوز نصب نشده
+    setState(() {
+      showInstallCard = PWAInstall().installPromptEnabled;
+    });
+  }
 
   void _goNext() {
     Get.toNamed(AppRoutes.onBoarding);
@@ -134,7 +154,10 @@ class _CheckScreenState extends State<CheckScreen> {
         backgroundBlendMode: BlendMode.overlay,
         boxShadow: [
           BoxShadow(
-            color: Colors.white.withValues(alpha: 0.15),
+            color: PWAInstall().installPromptEnabled
+                ? Colors.transparent
+                : Colors.greenAccent.withValues(alpha: 0.5),
+
             blurRadius: 7,
             spreadRadius: 1,
           ),
@@ -155,7 +178,9 @@ class _CheckScreenState extends State<CheckScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              "install_webapp_message".tr,
+              PWAInstall().installPromptEnabled
+                  ? "install_webapp_message".tr
+                  : 'نصب با موفقیت انجام شده است',
               style: const TextStyle(color: Colors.white70, fontSize: 13),
             ),
             const SizedBox(height: 14),
@@ -164,27 +189,40 @@ class _CheckScreenState extends State<CheckScreen> {
               children: [
                 Container(),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    showInfoToast(description: 'install_instructions'.tr);
+                  onPressed: () async {
+                    if (PWAInstall().installPromptEnabled) {
+                      PWAInstall().promptInstall_();
+                      await Future.delayed(const Duration(seconds: 1));
+                      setState(() {
+                        showInstallCard = !PWAInstall().installPromptEnabled;
+                      });
+                    } else {
+                      showInfoToast(
+                        description: 'وب‌اپ نصب شده یا نصب ممکن نیست',
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: appInstalled
-                        ? Colors.greenAccent
-                        : Colors.blueAccent,
+                    backgroundColor: PWAInstall().installPromptEnabled
+                        ? Colors.blueAccent
+                        : Colors.greenAccent,
                     foregroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  icon: appInstalled
-                      ? const Icon(Icons.check, size: 18)
-                      : const SizedBox(),
+                  icon: PWAInstall().installPromptEnabled
+                      ? const Icon(
+                          Icons.download,
+                          size: 18,
+                          color: Colors.white,
+                        )
+                      : const Icon(Icons.check, size: 18, color: Colors.white),
                   label: Text(
-                    appInstalled ? 'نصب شده' : 'install'.tr,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    PWAInstall().installPromptEnabled
+                        ? 'install'.tr
+                        : 'نصب شده',
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ],
@@ -269,8 +307,7 @@ class _CheckScreenState extends State<CheckScreen> {
                     isLoading: ctrl.locationLoading.value,
                   );
                 }),
-
-                _buildInstallCard(),
+                if (kIsWeb && showInstallCard) _buildInstallCard(),
               ],
             ),
           ),
