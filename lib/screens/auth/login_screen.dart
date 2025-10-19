@@ -119,8 +119,9 @@ class _Login extends GetView<InitialController> {
                     enableValidation: true,
                     validator: (value) {
                       if (value.isEmpty) return 'نباید خالی باشد';
-                      if (!value.startsWith('09'))
+                      if (!value.startsWith('09')) {
                         return 'شماره باید با 09 شروع شود';
+                      }
                       if (value.length != 11) return 'شماره باید 11 رقم باشد';
                       return '';
                     },
@@ -142,10 +143,13 @@ class _Login extends GetView<InitialController> {
                             children: [
                               Radio<VerificationMethod>(
                                 value: method,
+                                // ignore: deprecated_member_use
                                 groupValue: controller.selectedMethod.value,
+                                // ignore: deprecated_member_use
                                 onChanged: (val) {
-                                  if (val != null)
+                                  if (val != null) {
                                     controller.selectedMethod(val);
+                                  }
                                 },
                                 activeColor: themeData.colorScheme.onPrimary,
                                 fillColor: WidgetStateProperty.resolveWith((

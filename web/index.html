@@ -230,36 +230,36 @@
       setTimeout(() => splash.remove(), 700);
     });
 
-    <!-- Capture PWA install prompt event -->
+    // <!-- Capture PWA install prompt event -->
 
-    let deferredPrompt;
+    // let deferredPrompt;
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      deferredPrompt = e;
-    });
+    // window.addEventListener('beforeinstallprompt', (e) => {
+    //   deferredPrompt = e;
+    // });
 
-    function promptInstall() {
-      deferredPrompt.prompt();
-    }
+    // function promptInstall() {
+    //   deferredPrompt.prompt();
+    // }
 
     // Listen for app install event
-    window.addEventListener('appinstalled', () => {
-      deferredPrompt = null;
-      appInstalled();
-    });
+    // window.addEventListener('appinstalled', () => {
+    //   deferredPrompt = null;
+    //   appInstalled();
+    // });
 
-    // Track how PWA was launched (either from browser or as PWA)
-    function getLaunchMode() {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      if (deferredPrompt) hasPrompt();
-      if (document.referrer.startsWith('android-app://')) {
-        appLaunchedAsTWA();
-      } else if (navigator.standalone || isStandalone) {
-        appLaunchedAsPWA();
-      } else {
-        window.appLaunchedInBrowser();
-      }
-    }
+    // // Track how PWA was launched (either from browser or as PWA)
+    // function getLaunchMode() {
+    //   const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    //   if (deferredPrompt) hasPrompt();
+    //   if (document.referrer.startsWith('android-app://')) {
+    //     appLaunchedAsTWA();
+    //   } else if (navigator.standalone || isStandalone) {
+    //     appLaunchedAsPWA();
+    //   } else {
+    //     window.appLaunchedInBrowser();
+    //   }
+    // }
 
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
