@@ -27,7 +27,8 @@ class _CheckScreenState extends State<CheckScreen> {
   @override
   void initState() {
     super.initState();
-    _checkPwaStatus(); // یک بار سریع چک کن
+    // ⏳ یک تاخیر ۳ ثانیه‌ای قبل از چک‌کردن اولیه
+    Future.delayed(const Duration(seconds: 3), _checkPwaStatus);
     _startPwaPolling(); // سپس به صورت منظم چک کن
   }
 
@@ -55,11 +56,15 @@ class _CheckScreenState extends State<CheckScreen> {
   void _startPwaPolling() {
     if (!kIsWeb) return;
 
-    // اگر قبلاً timer داشتیم، کنسلش کن
+    // اگر قبلاً در حال polling بودیم، متوقفش کن
     _pwaPollTimer?.cancel();
 
-    // هر 1 ثانیه چک کن — می‌تونی این مقدار رو کمتر یا بیشتر کنی
-    _pwaPollTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+    _pwaPollTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
       try {
         final isStandaloneNow = web.window
             .matchMedia('(display-mode: standalone)')
@@ -69,19 +74,17 @@ class _CheckScreenState extends State<CheckScreen> {
         final installedNow = isStandaloneNow || isIOSStandaloneNow;
 
         if (installedNow != _isPwaInstalled) {
-          if (mounted) {
-            setState(() {
-              _isPwaInstalled = installedNow;
-            });
-          }
-          // اگر نصب شد، می‌تونیم polling رو هم متوقف کنیم (دیگه لازم نیست ادامه بدیم)
+          setState(() => _isPwaInstalled = installedNow);
+
+          // ✅ اگر نصب شد، polling متوقف شود
           if (installedNow) {
-            _pwaPollTimer?.cancel();
+            timer.cancel();
             _pwaPollTimer = null;
           }
         }
       } catch (e) {
-        // ignore errors silently (fail-safe)
+        // برای اطمینان از عدم کرش در مرورگرهای خاص
+        debugPrint('PWA polling error: $e');
       }
     });
   }
@@ -99,6 +102,7 @@ class _CheckScreenState extends State<CheckScreen> {
 
   Widget _buildInstallCard() {
     final screenWidth = Get.width;
+    final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
     return Container(
       width: screenWidth * 0.9,
@@ -147,16 +151,21 @@ class _CheckScreenState extends State<CheckScreen> {
               children: [
                 Container(),
                 ElevatedButton.icon(
-                  onPressed: PWAHelper.instance.canInstall
-                      ? () async {
-                          await PWAHelper.instance.promptInstall();
-                          // بعد از prompt سعی کن وضعیت نصب را به‌روز کنی
-                          await Future.delayed(const Duration(seconds: 1));
-                          _checkPwaStatus();
-                        }
-                      : () {
-                          showInfoToast(description: "install_instructions".tr);
-                        },
+                  onPressed: () async {
+                    if (isIOS) {
+                      showInfoToast(
+                        description:
+                            "برای نصب، از دکمه Share در Safari استفاده کنید و گزینه 'Add to Home Screen' را بزنید.",
+                      );
+                    } else if (PWAHelper.instance.canInstall) {
+                      await PWAHelper.instance.promptInstall();
+                      await Future.delayed(const Duration(seconds: 1));
+                      _checkPwaStatus();
+                    } else {
+                      showInfoToast(description: "install_instructions".tr);
+                    }
+                  },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: PWAHelper.instance.canInstall
                         ? Colors.blueAccent
