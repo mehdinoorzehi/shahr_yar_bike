@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bike/app_routes.dart';
 import 'package:bike/controllers/initial_controller.dart';
 import 'package:bike/helper/pwa_helper.dart';
+import 'package:bike/helper/pwa_js_interop.dart';
 import 'package:bike/widgets/animated_background.dart';
 import 'package:bike/widgets/button.dart';
 import 'package:bike/widgets/toast.dart';
@@ -27,9 +28,8 @@ class _CheckScreenState extends State<CheckScreen> {
   @override
   void initState() {
     super.initState();
-    // ⏳ یک تاخیر ۳ ثانیه‌ای قبل از چک‌کردن اولیه
     Future.delayed(const Duration(seconds: 3), _checkPwaStatus);
-    _startPwaPolling(); // سپس به صورت منظم چک کن
+    _startPwaPolling();
   }
 
   Future<void> _checkPwaStatus() async {
@@ -42,14 +42,16 @@ class _CheckScreenState extends State<CheckScreen> {
       final navigator = web.window.navigator;
       final isIOSStandalone = (navigator as dynamic).standalone == true;
 
+      // 🔹 از JS وضعیت نصب‌شده بودن PWA را می‌گیریم
+      final installedByEvent = PwaJsInterop.isInstalled();
+
       if (mounted) {
         setState(() {
-          _isPwaInstalled = isStandalone || isIOSStandalone;
+          _isPwaInstalled = isStandalone || isIOSStandalone || installedByEvent;
         });
       }
     } catch (e) {
-      // اگر به هر دلیلی package:web ناتوان بود، خطا را نادیده بگیر
-      // و اجازه بده کارت نمایش داده شود (fail-safe).
+      debugPrint('PWA check error: $e');
     }
   }
 
@@ -102,7 +104,6 @@ class _CheckScreenState extends State<CheckScreen> {
 
   Widget _buildInstallCard() {
     final screenWidth = Get.width;
-    final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
     return Container(
       width: screenWidth * 0.9,
@@ -113,15 +114,7 @@ class _CheckScreenState extends State<CheckScreen> {
         color: Colors.white.withValues(alpha: 0.07),
         backgroundBlendMode: BlendMode.overlay,
         boxShadow: const [
-          BoxShadow(
-            color:
-                //  PWAInstall().installPromptEnabled?
-                Colors.transparent,
-
-            // : Colors.greenAccent.withValues(alpha: 0.5),
-            blurRadius: 7,
-            spreadRadius: 1,
-          ),
+          BoxShadow(color: Colors.transparent, blurRadius: 7, spreadRadius: 1),
         ],
       ),
       child: Padding(
@@ -151,21 +144,16 @@ class _CheckScreenState extends State<CheckScreen> {
               children: [
                 Container(),
                 ElevatedButton.icon(
-                  onPressed: () async {
-                    if (isIOS) {
-                      showInfoToast(
-                        description:
-                            "برای نصب، از دکمه Share در Safari استفاده کنید و گزینه 'Add to Home Screen' را بزنید.",
-                      );
-                    } else if (PWAHelper.instance.canInstall) {
-                      await PWAHelper.instance.promptInstall();
-                      await Future.delayed(const Duration(seconds: 1));
-                      _checkPwaStatus();
-                    } else {
-                      showInfoToast(description: "install_instructions".tr);
-                    }
-                  },
-
+                  onPressed: PWAHelper.instance.canInstall
+                      ? () async {
+                          await PWAHelper.instance.promptInstall();
+                          // بعد از prompt سعی کن وضعیت نصب را به‌روز کنی
+                          await Future.delayed(const Duration(seconds: 1));
+                          _checkPwaStatus();
+                        }
+                      : () {
+                          showInfoToast(description: "install_instructions".tr);
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: PWAHelper.instance.canInstall
                         ? Colors.blueAccent

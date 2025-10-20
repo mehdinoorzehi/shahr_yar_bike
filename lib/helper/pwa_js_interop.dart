@@ -11,11 +11,24 @@ external JSBoolean? _jsIsInstallablePWA();
 @JS('promptInstallPWA')
 external JSPromise? _jsPromptInstallPWA();
 
+@JS('pwaInstalled')
+external JSBoolean? _jsPwaInstalled;
+
 class PwaJsInterop {
   /// بررسی اینکه آیا PWA قابل نصب است یا نه
   static bool canInstall() {
     try {
       final result = _jsIsInstallablePWA();
+      return result?.toDart == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// آیا اپ نصب شده؟
+  static bool isInstalled() {
+    try {
+      final result = _jsPwaInstalled;
       return result?.toDart == true;
     } catch (_) {
       return false;
