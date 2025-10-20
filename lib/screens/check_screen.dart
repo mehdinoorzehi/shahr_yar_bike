@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:bike/app_routes.dart';
 import 'package:bike/controllers/initial_controller.dart';
-import 'package:bike/helper/pwa.dart';
+import 'package:bike/helper/pwa_helper.dart';
 import 'package:bike/widgets/animated_background.dart';
 import 'package:bike/widgets/button.dart';
 import 'package:bike/widgets/toast.dart';
@@ -29,9 +29,6 @@ class _CheckScreenState extends State<CheckScreen> {
     super.initState();
     _checkPwaStatus(); // یک بار سریع چک کن
     _startPwaPolling(); // سپس به صورت منظم چک کن
-    if (kIsWeb) {
-      PWAInstallHelper.instance.init();
-    }
   }
 
   Future<void> _checkPwaStatus() async {
@@ -150,37 +147,32 @@ class _CheckScreenState extends State<CheckScreen> {
               children: [
                 Container(),
                 ElevatedButton.icon(
-                  onPressed: () async {
-                    if (PWAInstallHelper.instance.canInstall) {
-                      await PWAInstallHelper.instance.promptInstall();
-                      await Future.delayed(const Duration(seconds: 2));
-                      _checkPwaStatus(); // به‌روز رسانی سریع UI
-                    } else {
-                      showInfoToast(description: "install_instructions".tr);
-                    }
-                  },
-
+                  onPressed: PWAHelper.instance.canInstall
+                      ? () async {
+                          await PWAHelper.instance.promptInstall();
+                          // بعد از prompt سعی کن وضعیت نصب را به‌روز کنی
+                          await Future.delayed(const Duration(seconds: 1));
+                          _checkPwaStatus();
+                        }
+                      : () {
+                          showInfoToast(description: "install_instructions".tr);
+                        },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        // PWAInstall().installPromptEnabled
-                        // ?
-                        Colors.blueAccent,
-                    // : Colors.greenAccent,
-                    foregroundColor: Colors.black,
+                    backgroundColor: PWAHelper.instance.canInstall
+                        ? Colors.blueAccent
+                        : Colors.grey,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  icon:
-                      // PWAInstall().installPromptEnabled
-                      //     ?
-                      const Icon(Icons.download, size: 18, color: Colors.white),
-                  // : const Icon(Icons.check, size: 18, color: Colors.white),
+                  icon: const Icon(
+                    Icons.download,
+                    size: 18,
+                    color: Colors.white,
+                  ),
                   label: Text(
-                    // PWAInstall().installPromptEnabled
-                    // ?
                     'install'.tr,
-                    // : 'نصب شده',
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),

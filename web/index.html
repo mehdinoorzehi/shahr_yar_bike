@@ -230,36 +230,46 @@
       setTimeout(() => splash.remove(), 700);
     });
 
-    // <!-- Capture PWA install prompt event -->
 
-    // let deferredPrompt;
 
-    // window.addEventListener('beforeinstallprompt', (e) => {
-    //   deferredPrompt = e;
-    // });
+    <!-- web/index.html  - اضافه کن یا در انتهای body این <script> را اضافه کن -->
+    (function () {
+      // متغیر نگهدارنده event
+      window.__deferredPWAInstallPrompt = null;
 
-    // function promptInstall() {
-    //   deferredPrompt.prompt();
-    // }
+      window.addEventListener('beforeinstallprompt', (e) => {
+        // جلوی نمایش خودکار مرورگر را می‌گیریم و event را نگه می‌داریم
+        e.preventDefault();
+        window.__deferredPWAInstallPrompt = e;
+        console.log('[PWA] beforeinstallprompt captured');
+      });
 
-    // Listen for app install event
-    // window.addEventListener('appinstalled', () => {
-    //   deferredPrompt = null;
-    //   appInstalled();
-    // });
+      // آیا قابل نصب است؟
+      window.isInstallablePWA = function () {
+        return !!window.__deferredPWAInstallPrompt;
+      };
 
-    // // Track how PWA was launched (either from browser or as PWA)
-    // function getLaunchMode() {
-    //   const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    //   if (deferredPrompt) hasPrompt();
-    //   if (document.referrer.startsWith('android-app://')) {
-    //     appLaunchedAsTWA();
-    //   } else if (navigator.standalone || isStandalone) {
-    //     appLaunchedAsPWA();
-    //   } else {
-    //     window.appLaunchedInBrowser();
-    //   }
-    // }
+      // نمایش prompt (اگر موجود باشد)
+      window.promptInstallPWA = async function () {
+        if (!window.__deferredPWAInstallPrompt) {
+          console.log('[PWA] promptInstallPWA called but no deferred prompt');
+          return null;
+        }
+
+        try {
+          window.__deferredPWAInstallPrompt.prompt();
+          // userChoice یک Promise است؛ صبر می‌کنیم نتیجه را بگیرد
+          const choiceResult = await window.__deferredPWAInstallPrompt.userChoice;
+          console.log('[PWA] userChoice:', choiceResult);
+          // پاکسازی
+          window.__deferredPWAInstallPrompt = null;
+          return choiceResult;
+        } catch (err) {
+          console.error('[PWA] promptInstallPWA error:', err);
+          return null;
+        }
+      };
+    })();
 
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {

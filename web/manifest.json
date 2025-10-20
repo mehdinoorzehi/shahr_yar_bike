@@ -2,7 +2,7 @@
     "name": "SHAHRYAR",
     "short_name": "SHAHRYAR",
     "start_url": ".",
-    "display": "fullscreen",
+    "display": "standalone",
     "background_color": "#000000FF",
     "theme_color": "#000000FF",
     "description": "سیستم هوشمند حمل و نقل پاک",
