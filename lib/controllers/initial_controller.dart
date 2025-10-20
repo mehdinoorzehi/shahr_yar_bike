@@ -76,9 +76,9 @@ class InitialController extends GetxController {
   Future<void> checkServerConnection() async {
     serverLoading.value = true;
     try {
-      final connectivityResult = await Connectivity().checkConnectivity();
-      // ignore: unrelated_type_equality_checks
-      if (connectivityResult == ConnectivityResult.none) {
+      final connectivityResults = await Connectivity().checkConnectivity();
+      if (connectivityResults.contains(ConnectivityResult.none) ||
+          connectivityResults.isEmpty) {
         message.value = 'internet_connection_error'.tr;
         serverOk.value = false;
         return;

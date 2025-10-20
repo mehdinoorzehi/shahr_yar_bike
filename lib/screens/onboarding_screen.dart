@@ -20,23 +20,11 @@ class OnBoardingScreen extends StatelessWidget {
           if (
           // controller.imagePaths.isEmpty &&
           controller.serverLoading.value == true) {
-            return Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'processing'.tr,
-                    style: theme.textTheme.titleMedium!.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 15.0),
-                  const SizedBox(
-                    width: 25,
-                    height: 25,
-                    child: CircularProgressIndicator(),
-                  ),
-                ],
+            return const Center(
+              child: SizedBox(
+                width: 25,
+                height: 25,
+                child: CircularProgressIndicator(color: Colors.white),
               ),
             );
           }
@@ -86,10 +74,13 @@ class OnBoardingScreen extends StatelessWidget {
                                                 return child;
                                               }
                                               return const SizedBox(
-                                                width: 60,
-                                                height: 60,
+                                                width: 30,
+                                                height: 30,
                                                 child:
-                                                    CircularProgressIndicator(),
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2.5,
+                                                      color: Colors.white,
+                                                    ),
                                               );
                                             },
                                         errorBuilder: (context, error, stack) =>
@@ -103,6 +94,35 @@ class OnBoardingScreen extends StatelessWidget {
                                         width: 250,
                                         height: 250,
                                         fit: BoxFit.contain,
+                                        frameBuilder:
+                                            (
+                                              context,
+                                              child,
+                                              frame,
+                                              wasSynchronouslyLoaded,
+                                            ) {
+                                              if (wasSynchronouslyLoaded) {
+                                                return child;
+                                              }
+                                              return AnimatedOpacity(
+                                                opacity: frame == null ? 0 : 1,
+                                                duration: const Duration(
+                                                  milliseconds: 300,
+                                                ),
+                                                child: frame == null
+                                                    ? const SizedBox(
+                                                        width: 30,
+                                                        height: 30,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                              strokeWidth: 2.5,
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                      )
+                                                    : child,
+                                              );
+                                            },
                                         errorBuilder: (context, error, stack) =>
                                             const Icon(
                                               Icons.error,

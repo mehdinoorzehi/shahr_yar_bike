@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'package:bike/app_routes.dart';
 import 'package:bike/controllers/initial_controller.dart';
+import 'package:bike/helper/pwa.dart';
 import 'package:bike/widgets/animated_background.dart';
 import 'package:bike/widgets/button.dart';
+import 'package:bike/widgets/toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-// import 'package:pwa_install/pwa_install.dart';
+import 'package:web/web.dart' as web;
 
 class CheckScreen extends StatefulWidget {
   const CheckScreen({super.key});
@@ -15,129 +18,86 @@ class CheckScreen extends StatefulWidget {
 }
 
 class _CheckScreenState extends State<CheckScreen> {
-  bool appInstalled = false;
   final checkServerController = Get.find<InitialController>();
 
-  bool showInstallCard = false;
+  bool _isPwaInstalled = false;
+
+  Timer? _pwaPollTimer;
 
   @override
   void initState() {
     super.initState();
-    // _initPwaStatus();
+    _checkPwaStatus(); // یک بار سریع چک کن
+    _startPwaPolling(); // سپس به صورت منظم چک کن
+    if (kIsWeb) {
+      PWAInstallHelper.instance.init();
+    }
   }
 
-  // Future<void> _initPwaStatus() async {
-  //   // setup قبلاً در main انجام شده، فقط وضعیت رو چک می‌کنیم
-  //   await Future.delayed(const Duration(milliseconds: 300));
+  Future<void> _checkPwaStatus() async {
+    if (!kIsWeb) return;
 
-  //   // اگر قابلیت نصب فعال باشه، یعنی هنوز نصب نشده
-  //   setState(() {
-  //     showInstallCard = PWAInstall().installPromptEnabled;
-  //   });
-  // }
+    try {
+      final isStandalone = web.window
+          .matchMedia('(display-mode: standalone)')
+          .matches;
+      final navigator = web.window.navigator;
+      final isIOSStandalone = (navigator as dynamic).standalone == true;
 
-  void _goNext() {
-    Get.toNamed(AppRoutes.onBoarding);
+      if (mounted) {
+        setState(() {
+          _isPwaInstalled = isStandalone || isIOSStandalone;
+        });
+      }
+    } catch (e) {
+      // اگر به هر دلیلی package:web ناتوان بود، خطا را نادیده بگیر
+      // و اجازه بده کارت نمایش داده شود (fail-safe).
+    }
   }
 
-  Widget _buildCard({
-    required String title,
-    required String description,
-    required bool isOk,
-    required VoidCallback? onCheck,
-    required String guideText,
-    bool showGuide = false, // ✅ اضافه شد
-    bool isLoading = false,
-  }) {
-    final screenWidth = Get.width;
+  void _startPwaPolling() {
+    if (!kIsWeb) return;
 
-    return Container(
-      width: screenWidth * 0.9,
-      padding: const EdgeInsets.all(15),
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-        color: Colors.white.withValues(alpha: 0.07),
-        backgroundBlendMode: BlendMode.overlay,
-        boxShadow: [
-          BoxShadow(
-            color: isOk
-                ? Colors.greenAccent.withValues(alpha: 0.5)
-                : Colors.redAccent.withValues(alpha: 0.4),
-            blurRadius: 7,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            textAlign: TextAlign.right,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            description,
-            style: const TextStyle(color: Colors.white70, fontSize: 13),
-          ),
-          const SizedBox(height: 14),
+    // اگر قبلاً timer داشتیم، کنسلش کن
+    _pwaPollTimer?.cancel();
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (showGuide) // ✅ فقط در صورت نیاز نمایش داده شود
-                TextButton(
-                  onPressed: () {
-                    Get.snackbar(
-                      "راهنما",
-                      "لطفاً تنظیمات دستگاه خود را بررسی کنید.",
-                      backgroundColor: Colors.black87,
-                      colorText: Colors.white,
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.amberAccent,
-                  ),
-                  child: Text(guideText),
-                )
-              else
-                const SizedBox(),
-              ElevatedButton.icon(
-                onPressed: onCheck,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isOk ? Colors.greenAccent : Colors.redAccent,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                icon: isOk
-                    ? const Icon(Icons.check, size: 18, color: Colors.white)
-                    : const SizedBox(),
-                label: isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(color: Colors.white),
-                      )
-                    : Text(
-                        isOk ? 'check_again'.tr : 'check'.tr,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+    // هر 1 ثانیه چک کن — می‌تونی این مقدار رو کمتر یا بیشتر کنی
+    _pwaPollTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      try {
+        final isStandaloneNow = web.window
+            .matchMedia('(display-mode: standalone)')
+            .matches;
+        final navigator = web.window.navigator;
+        final isIOSStandaloneNow = (navigator as dynamic).standalone == true;
+        final installedNow = isStandaloneNow || isIOSStandaloneNow;
+
+        if (installedNow != _isPwaInstalled) {
+          if (mounted) {
+            setState(() {
+              _isPwaInstalled = installedNow;
+            });
+          }
+          // اگر نصب شد، می‌تونیم polling رو هم متوقف کنیم (دیگه لازم نیست ادامه بدیم)
+          if (installedNow) {
+            _pwaPollTimer?.cancel();
+            _pwaPollTimer = null;
+          }
+        }
+      } catch (e) {
+        // ignore errors silently (fail-safe)
+      }
+    });
+  }
+
+  void _stopPwaPolling() {
+    _pwaPollTimer?.cancel();
+    _pwaPollTimer = null;
+  }
+
+  @override
+  void dispose() {
+    _stopPwaPolling();
+    super.dispose();
   }
 
   Widget _buildInstallCard() {
@@ -154,10 +114,10 @@ class _CheckScreenState extends State<CheckScreen> {
         boxShadow: const [
           BoxShadow(
             color:
-            //  PWAInstall().installPromptEnabled?
-                 Colors.transparent,
-                // : Colors.greenAccent.withValues(alpha: 0.5),
+                //  PWAInstall().installPromptEnabled?
+                Colors.transparent,
 
+            // : Colors.greenAccent.withValues(alpha: 0.5),
             blurRadius: 7,
             spreadRadius: 1,
           ),
@@ -179,9 +139,9 @@ class _CheckScreenState extends State<CheckScreen> {
             const SizedBox(height: 6),
             Text(
               // PWAInstall().installPromptEnabled
-                  // ?
-                  "install_webapp_message".tr,
-                  // : 'نصب با موفقیت انجام شده است',
+              // ?
+              "install_webapp_message".tr,
+              // : 'نصب با موفقیت انجام شده است',
               style: const TextStyle(color: Colors.white70, fontSize: 13),
             ),
             const SizedBox(height: 14),
@@ -191,43 +151,36 @@ class _CheckScreenState extends State<CheckScreen> {
                 Container(),
                 ElevatedButton.icon(
                   onPressed: () async {
-                    // if (PWAInstall().installPromptEnabled) {
-                    //   PWAInstall().promptInstall_();
-                    //   await Future.delayed(const Duration(seconds: 1));
-                    //   setState(() {
-                    //     showInstallCard = !PWAInstall().installPromptEnabled;
-                    //   });
-                    // } else {
-                    //   showInfoToast(
-                    //     description: 'وب‌اپ نصب شده یا نصب ممکن نیست',
-                    //   );
-                    // }
+                    if (PWAInstallHelper.instance.canInstall) {
+                      await PWAInstallHelper.instance.promptInstall();
+                      await Future.delayed(const Duration(seconds: 2));
+                      _checkPwaStatus(); // به‌روز رسانی سریع UI
+                    } else {
+                      showInfoToast(description: "install_instructions".tr);
+                    }
                   },
+
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: 
-                    // PWAInstall().installPromptEnabled
-                        // ? 
+                    backgroundColor:
+                        // PWAInstall().installPromptEnabled
+                        // ?
                         Colors.blueAccent,
-                        // : Colors.greenAccent,
+                    // : Colors.greenAccent,
                     foregroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  icon: 
-                  // PWAInstall().installPromptEnabled
-                  //     ?
-                      const Icon(
-                          Icons.download,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      // : const Icon(Icons.check, size: 18, color: Colors.white),
+                  icon:
+                      // PWAInstall().installPromptEnabled
+                      //     ?
+                      const Icon(Icons.download, size: 18, color: Colors.white),
+                  // : const Icon(Icons.check, size: 18, color: Colors.white),
                   label: Text(
                     // PWAInstall().installPromptEnabled
-                        // ? 
-                        'install'.tr,
-                        // : 'نصب شده',
+                    // ?
+                    'install'.tr,
+                    // : 'نصب شده',
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
@@ -243,16 +196,12 @@ class _CheckScreenState extends State<CheckScreen> {
   Widget build(BuildContext context) {
     return AnimatedBackground(
       child: Scaffold(
-        // ✅ نمایش دکمه Continue فقط وقتی هر دو اوکی باشند
         bottomNavigationBar: Obx(() {
           final ctrl = checkServerController;
           final allOk =
               ctrl.serverOk.value &&
               ctrl.currentPosition.value != null &&
-              ctrl
-                  .locationErrorMessage
-                  .value
-                  .isEmpty; // ✅ بررسی عدم خطای لوکیشن
+              ctrl.locationErrorMessage.value.isEmpty;
 
           if (!allOk) return const SizedBox();
 
@@ -261,7 +210,9 @@ class _CheckScreenState extends State<CheckScreen> {
             child: MyButton(
               isFocus: true,
               buttonText: 'continue'.tr,
-              onTap: _goNext,
+              onTap: () {
+                Get.toNamed(AppRoutes.onBoarding);
+              },
             ),
           );
         }),
@@ -288,12 +239,10 @@ class _CheckScreenState extends State<CheckScreen> {
                 }),
 
                 // ✅ کارت لوکیشن
-                // ✅ کارت لوکیشن
                 Obx(() {
                   final ctrl = checkServerController;
                   final hasError = ctrl.locationErrorMessage.value.isNotEmpty;
 
-                  // توضیحات بر اساس وضعیت
                   String desc = '';
                   if (ctrl.locationLoading.value) {
                     desc = 'location_checking'.tr;
@@ -313,7 +262,9 @@ class _CheckScreenState extends State<CheckScreen> {
                     isLoading: ctrl.locationLoading.value,
                   );
                 }),
-                if (kIsWeb && showInstallCard) _buildInstallCard(),
+
+                // کارت نصب وب‌اپ فقط وقتی نصب نشده
+                if (kIsWeb && !_isPwaInstalled) _buildInstallCard(),
               ],
             ),
           ),
@@ -321,4 +272,96 @@ class _CheckScreenState extends State<CheckScreen> {
       ),
     );
   }
+}
+
+Widget _buildCard({
+  required String title,
+  required String description,
+  required bool isOk,
+  required VoidCallback? onCheck,
+  required String guideText,
+  bool showGuide = false, // ✅ اضافه شد
+  bool isLoading = false,
+}) {
+  final screenWidth = Get.width;
+
+  return Container(
+    width: screenWidth * 0.9,
+    padding: const EdgeInsets.all(15),
+    margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+      color: Colors.white.withValues(alpha: 0.07),
+      backgroundBlendMode: BlendMode.overlay,
+      boxShadow: [
+        BoxShadow(
+          color: isOk
+              ? Colors.greenAccent.withValues(alpha: 0.5)
+              : Colors.redAccent.withValues(alpha: 0.4),
+          blurRadius: 7,
+          spreadRadius: 1,
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          textAlign: TextAlign.right,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          description,
+          style: const TextStyle(color: Colors.white70, fontSize: 13),
+        ),
+        const SizedBox(height: 14),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (showGuide) // ✅ فقط در صورت نیاز نمایش داده شود
+              TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.amberAccent,
+                ),
+                child: Text(guideText),
+              )
+            else
+              const SizedBox(),
+            ElevatedButton.icon(
+              onPressed: onCheck,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isOk ? Colors.greenAccent : Colors.redAccent,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              icon: isOk
+                  ? const Icon(Icons.check, size: 18, color: Colors.white)
+                  : const SizedBox(),
+              label: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(color: Colors.white),
+                    )
+                  : Text(
+                      isOk ? 'check_again'.tr : 'check'.tr,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
 }

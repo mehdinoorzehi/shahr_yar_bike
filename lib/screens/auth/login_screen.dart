@@ -80,7 +80,13 @@ class _Login extends GetView<InitialController> {
 
     return Obx(() {
       if (controller.serverLoading.value) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(
+          child: SizedBox(
+            width: 25,
+            height: 25,
+            child: CircularProgressIndicator(color: Colors.white),
+          ),
+        );
       }
 
       return Column(

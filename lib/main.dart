@@ -15,7 +15,6 @@ import 'web_update_checker.dart'
     if (dart.library.io) 'stub.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
   await setUp();
 
   final translationService = await Get.putAsync(

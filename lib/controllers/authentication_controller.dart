@@ -75,7 +75,11 @@ class AuthenticationController extends GetxController {
     final phone = phoneController.text.trim();
     final code = otpController.text.trim();
 
-    if (phone.isEmpty || phone.length < 10) {
+    if (phone.isEmpty) {
+      showWarningToast(description: 'شماره موبایل خود را وارد کنید');
+      return;
+    }
+    if (phone.length < 10) {
       showWarningToast(description: 'شماره موبایل نامعتبر است');
       return;
     }

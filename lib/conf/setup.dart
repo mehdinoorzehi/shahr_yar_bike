@@ -1,4 +1,5 @@
 import 'package:bike/controllers/authentication_controller.dart';
+import 'package:bike/controllers/internet_controller.dart';
 import 'package:bike/controllers/main_controller.dart';
 import 'package:bike/controllers/map_controller.dart';
 import 'package:bike/controllers/initial_controller.dart';
@@ -34,6 +35,8 @@ Future<void> setUp() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  Get.put(InternetController());
   Get.lazyPut(() => InitialController(), fenix: true);
   // Get.lazyPut(() => CheckAccessController(), fenix: true);
   Get.lazyPut(() => MapControllerX(), fenix: true);
