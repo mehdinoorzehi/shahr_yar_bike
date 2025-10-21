@@ -36,8 +36,6 @@ class AppRoutes {
   static const String checkScreen = '/check-access';
   static const String languageSelector = '/language-selector';
 
-
-
   static List<GetPage> pages = [
     GetPage(
       name: home,

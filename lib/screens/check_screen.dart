@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bike/app_routes.dart';
 import 'package:bike/controllers/initial_controller.dart';
 import 'package:bike/helper/pwa_helper.dart';
+import 'package:bike/screens/ios_guide_screen.dart';
 import 'package:bike/widgets/animated_background.dart';
 import 'package:bike/widgets/button.dart';
 import 'package:bike/widgets/toast.dart';
@@ -163,6 +164,14 @@ class _CheckScreenState extends State<CheckScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 🔹 اگر روی iOS هست و هنوز نصب نشده → فقط صفحه راهنما رو نشون بده
+    if (kIsWeb &&
+        PWAHelper.instance.isIOS &&
+        (PWAHelper.instance.isSafari || PWAHelper.instance.isChromeOnIOS) &&
+        !_isPwaInstalled) {
+      return const IOSGuideScreen();
+    }
+
     return AnimatedBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
