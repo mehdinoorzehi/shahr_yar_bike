@@ -4,9 +4,13 @@
 <head>
   <base href="$FLUTTER_BASE_HREF">
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="سیستم هوشمند حمل و نقل پاک">
+
+  <meta name="theme-color" content="transparent">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
@@ -27,7 +31,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: black;
+      background-color: transparent; 
       direction: rtl;
     }
 
@@ -38,6 +42,7 @@
       width: 100%;
       height: 100%;
       z-index: -1;
+      background: black;
     }
 
     #splash {
@@ -158,11 +163,12 @@
     <img src="assets/assets/img/logo3.png" class="text" alt="app name">
     <div class="loading-bar"></div>
   </div>
+
   <script src="pwa.js"></script>
   <script src="flutter_bootstrap.js" defer></script>
 
   <script>
-    /* 🎨 Animated mesh-like gradient background */
+    /* 🎨 Animated gradient background */
     const canvas = document.getElementById('bg');
     const ctx = canvas.getContext('2d');
     let width, height;
@@ -229,48 +235,6 @@
       splash.classList.add('fade-out');
       setTimeout(() => splash.remove(), 700);
     });
-
-
-
-    // <!-- web/index.html  - اضافه کن یا در انتهای body این <script> را اضافه کن -->
-    (function () {
-      // متغیر نگهدارنده event
-      window.__deferredPWAInstallPrompt = null;
-
-      window.addEventListener('beforeinstallprompt', (e) => {
-        // جلوی نمایش خودکار مرورگر را می‌گیریم و event را نگه می‌داریم
-        e.preventDefault();
-        window.__deferredPWAInstallPrompt = e;
-        console.log('[PWA] beforeinstallprompt captured');
-      });
-
-      // آیا قابل نصب است؟
-      window.isInstallablePWA = function () {
-        return !!window.__deferredPWAInstallPrompt;
-      };
-
-      // نمایش prompt (اگر موجود باشد)
-      window.promptInstallPWA = async function () {
-        if (!window.__deferredPWAInstallPrompt) {
-          console.log('[PWA] promptInstallPWA called but no deferred prompt');
-          return null;
-        }
-
-        try {
-          window.__deferredPWAInstallPrompt.prompt();
-          // userChoice یک Promise است؛ صبر می‌کنیم نتیجه را بگیرد
-          const choiceResult = await window.__deferredPWAInstallPrompt.userChoice;
-          console.log('[PWA] userChoice:', choiceResult);
-          // پاکسازی
-          window.__deferredPWAInstallPrompt = null;
-          return choiceResult;
-        } catch (err) {
-          console.error('[PWA] promptInstallPWA error:', err);
-          return null;
-        }
-      };
-    })();
-
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       window.location.reload();

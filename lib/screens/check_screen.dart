@@ -325,29 +325,32 @@ Widget _buildCard({
               )
             else
               const SizedBox(),
-            ElevatedButton.icon(
-              onPressed: onCheck,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isOk ? Colors.greenAccent : Colors.redAccent,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+            if (!isOk || isLoading)
+              ElevatedButton.icon(
+                onPressed: onCheck,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isOk ? Colors.greenAccent : Colors.redAccent,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-              ),
-              icon: isOk
-                  ? const Icon(Icons.check, size: 18, color: Colors.white)
-                  : const SizedBox(),
-              label: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(color: Colors.white),
-                    )
-                  : Text(
-                      isOk ? 'check_again'.tr : 'check'.tr,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-            ),
+                icon: isOk
+                    ? const Icon(Icons.check, size: 18, color: Colors.white)
+                    : const SizedBox(),
+                label: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(color: Colors.white),
+                      )
+                    : Text(
+                        isOk ? 'check_again'.tr : 'check'.tr,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+              )
+            else
+              const SizedBox.shrink(),
           ],
         ),
       ],

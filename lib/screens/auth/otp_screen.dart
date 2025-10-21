@@ -11,6 +11,8 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:get/get.dart';
 import 'dart:math' as math;
 import 'package:bike/extensions/translation_extension.dart';
+import 'package:flutter/services.dart'; // برای Clipboard
+import 'package:bike/helper/void_show_copird_msg.dart';
 
 class OtpScreen extends StatelessWidget {
   const OtpScreen({super.key});
@@ -53,6 +55,7 @@ class OtpScreen extends StatelessWidget {
     }
 
     // 🔹 حالت خاص: نمایش کد برای ارسال توسط کاربر
+
     if (authController.selectedMethod.value == 'sms_from_user') {
       return Scaffold(
         body: SafeArea(
@@ -69,24 +72,49 @@ class OtpScreen extends StatelessWidget {
                       size: 80,
                     ),
                     const SizedBox(height: 30),
-                    Text(
-                      'verification_code_display'.trNamed({
-                        'provider_number': authController.providerNumber.value,
-                      }),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
+
+                    // ✅ متن اول (provider_number)
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(
+                          ClipboardData(
+                            text: authController.providerNumber.value,
+                          ),
+                        );
+                        showCopiedMessage("شماره کپی شد ✅");
+                      },
+                      child: Text(
+                        'verification_code_display'.trNamed({
+                          'provider_number':
+                              authController.providerNumber.value,
+                        }),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
                     ),
+
                     const SizedBox(height: 24),
-                    Text(
-                      authController.userCode.value,
-                      style: const TextStyle(
-                        fontSize: 42,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.amber,
+
+                    // ✅ متن دوم (userCode)
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(
+                          ClipboardData(text: authController.userCode.value),
+                        );
+                        showCopiedMessage("کد کپی شد ✅");
+                      },
+                      child: Text(
+                        authController.userCode.value,
+                        style: const TextStyle(
+                          fontSize: 42,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber,
+                        ),
                       ),
                     ),
+
                     const SizedBox(height: 40),
                     Text(
                       "after_sending_code_press_check".tr,
