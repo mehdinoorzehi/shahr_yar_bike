@@ -31,16 +31,59 @@ class _CheckScreenState extends State<CheckScreen> {
     if (!kIsWeb) return;
 
     try {
-      final isStandalone = web.window
-          .matchMedia('(display-mode: standalone)')
-          .matches;
-      final isIOSStandalone =
-          (web.window.navigator as dynamic).standalone == true;
-      final installedByJs = PWAHelper.instance.isInstalled;
+      // 1️⃣ چند منبع مختلف برای تشخیص نصب
+      Future<bool> checkDisplayMode() async {
+        return web.window.matchMedia('(display-mode: standalone)').matches;
+      }
 
-      setState(() {
-        _isPwaInstalled = isStandalone || isIOSStandalone || installedByJs;
-      });
+      Future<bool> checkIOSStandalone() async {
+        try {
+          return (web.window.navigator as dynamic).standalone == true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      Future<bool> checkJsInstalled() async {
+        try {
+          // ممکنه JS هنوز آماده نباشه → تا 300ms صبر می‌کنیم و 3 بار تلاش می‌کنیم
+          for (int i = 0; i < 3; i++) {
+            final val = PWAHelper.instance.isInstalled;
+            if (val) return true;
+            await Future.delayed(const Duration(milliseconds: 100));
+          }
+          return false;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      Future<bool> checkLocalStorage() async {
+        try {
+          return web.window.localStorage.getItem('pwa_installed') == 'true';
+        } catch (_) {
+          return false;
+        }
+      }
+
+      // 2️⃣ اجرای هم‌زمان تمام چک‌ها و گرفتن اولین true یا false نهایی
+      final results = await Future.wait<bool>([
+        checkDisplayMode(),
+        checkIOSStandalone(),
+        checkJsInstalled(),
+        checkLocalStorage(),
+      ]);
+
+      final isInstalled = results.any((r) => r == true);
+
+      // 3️⃣ بروزرسانی state فقط اگر تغییر کرده باشه
+      if (mounted && _isPwaInstalled != isInstalled) {
+        setState(() => _isPwaInstalled = isInstalled);
+      }
+
+      debugPrint(
+        '[PWA] Status: ${isInstalled ? "✅ Installed" : "❌ Not installed"}',
+      );
     } catch (e) {
       debugPrint('[PWA] check error: $e');
     }
@@ -77,29 +120,40 @@ class _CheckScreenState extends State<CheckScreen> {
               style: const TextStyle(color: Colors.white70, fontSize: 13),
             ),
             const SizedBox(height: 14),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton.icon(
-                onPressed: PWAHelper.instance.canInstall
-                    ? () async {
-                        await PWAHelper.instance.promptInstall();
-                        await Future.delayed(const Duration(milliseconds: 800));
-                        _checkPwaStatus();
+            ElevatedButton.icon(
+              onPressed: PWAHelper.instance.canInstall
+                  ? () async {
+                      // 🔹 درخواست نصب از JS
+                      await PWAHelper.instance.promptInstall();
+
+                      // 🔹 بعد از نصب، وضعیت را فوراً ثبت و کارت را مخفی کن
+                      try {
+                        web.window.localStorage.setItem(
+                          'pwa_installed',
+                          'true',
+                        );
+                      } catch (_) {}
+
+                      // 🔹 اطمینان از بروزرسانی state بدون نیاز به بررسی مجدد
+                      if (mounted) {
+                        setState(() => _isPwaInstalled = true);
                       }
-                    : () =>
-                          showInfoToast(description: "install_instructions".tr),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: PWAHelper.instance.canInstall
-                      ? Colors.blueAccent
-                      : Colors.grey,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+
+                      debugPrint('[PWA] Installed manually via promptInstall');
+                    }
+                  : () => showInfoToast(description: "install_instructions".tr),
+
+              style: ElevatedButton.styleFrom(
+                backgroundColor: PWAHelper.instance.canInstall
+                    ? Colors.blueAccent
+                    : Colors.grey,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                icon: const Icon(Icons.download, size: 18),
-                label: Text('install'.tr),
               ),
+              icon: const Icon(Icons.download, size: 18),
+              label: Text('install'.tr),
             ),
           ],
         ),

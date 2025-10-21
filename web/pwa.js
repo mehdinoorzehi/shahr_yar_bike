@@ -1,4 +1,10 @@
 (() => {
+// ✅ تشخیص فوری حالت نصب‌شده (قبل از هر چیز)
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+  localStorage.setItem('pwa_installed', 'true');
+  console.log('[PWA] Detected standalone mode early');
+}
+
   window.pwaInstalled = false;
   window.__deferredPWAInstallPrompt = null;
 
