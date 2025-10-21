@@ -52,7 +52,7 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
             Positioned.fill(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
-                child: Container(color: scheme.primary.withOpacity(0.8)),
+                child: Container(color: scheme.primary.withValues(alpha: 0.8)),
               ),
             ),
             // 🎨 پس‌زمینه‌ی مایع متحرک
@@ -70,8 +70,8 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      scheme.primary.withOpacity(0.15),
-                      scheme.secondary.withOpacity(0.15),
+                      scheme.primary.withValues(alpha: 0.15),
+                      scheme.secondary.withValues(alpha: 0.15),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -125,8 +125,8 @@ class _LiquidGradientPainter extends CustomPainter {
     for (int i = 0; i < blobs.length; i++) {
       final gradient = RadialGradient(
         colors: [
-          colors[i % 2].withOpacity(0.7),
-          colors[(i + 1) % 2].withOpacity(0.0),
+          colors[i % 2].withValues(alpha: 0.7),
+          colors[(i + 1) % 2].withValues(alpha: 0.0),
         ],
       );
 

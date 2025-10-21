@@ -1,4 +1,3 @@
-// lib/helper/pwa_helper.dart
 import 'package:flutter/foundation.dart';
 import 'pwa_js_interop.dart';
 
@@ -11,6 +10,15 @@ class PWAHelper {
     if (!kIsWeb) return false;
     try {
       return PwaJsInterop.canInstall();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool get isInstalled {
+    if (!kIsWeb) return false;
+    try {
+      return PwaJsInterop.isInstalled();
     } catch (_) {
       return false;
     }
