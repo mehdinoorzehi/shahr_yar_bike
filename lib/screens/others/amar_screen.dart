@@ -31,16 +31,19 @@ class AmarScreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              height: 110,
-              alignment: Alignment.bottomRight,
+              height: 100,
               padding: const EdgeInsets.only(bottom: 10, right: 15),
-              child: Text(
-                'آمار من',
-                style: TextStyle(
-                  color: _theme.colorScheme.onPrimary,
-                  fontSize: 23,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                children: [
+                  Text(
+                    'آمار من',
+                    style: TextStyle(
+                      color: _theme.colorScheme.onPrimary,
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -100,6 +103,7 @@ class AmarScreen extends StatelessWidget {
                         ),
                         // const SizedBox(height: 30),
                         MyButton(buttonText: 'اشتراک گذاری', onTap: () {}),
+                        const SizedBox(height: 30),
                       ],
                     ),
                   ),

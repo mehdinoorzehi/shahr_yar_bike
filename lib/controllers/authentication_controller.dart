@@ -105,7 +105,7 @@ class AuthenticationController extends GetxController {
 
       if (response['status'] == 200 || response['token'] != null) {
         token.value = response['token'];
-        Get.offAllNamed('/home');
+        Get.offAllNamed(AppRoutes.home);
       } else {
         // final errMsg = response['message'] ?? 'کد واردشده اشتباه است';
         // showErrorToast(description: errMsg);

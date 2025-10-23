@@ -32,19 +32,10 @@ class ProfileScreen extends StatelessWidget {
           // 🔹 هدر بالای صفحه
           Container(
             height: 200,
-            alignment: Alignment.bottomRight,
             padding: const EdgeInsets.only(bottom: 80),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              // mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  'حساب کاربری',
-                  style: TextStyle(
-                    color: _theme.colorScheme.onPrimary,
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
                 IconButton(
                   onPressed: () {
                     Get.back();
@@ -54,13 +45,21 @@ class ProfileScreen extends StatelessWidget {
                     color: _theme.colorScheme.onPrimary,
                   ),
                 ),
+                Text(
+                  'حساب کاربری',
+                  style: TextStyle(
+                    color: _theme.colorScheme.onPrimary,
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ),
 
           // 🔹 لایه سفید پایین
           Positioned.fill(
-            top: 180,
+            top: 120,
             child: Container(
               decoration: BoxDecoration(
                 color: _theme.colorScheme.surface,
@@ -74,7 +73,7 @@ class ProfileScreen extends StatelessWidget {
 
           // 🔹 محتوای اصلی
           Positioned.fill(
-            top: 140,
+            top: 80,
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Directionality(

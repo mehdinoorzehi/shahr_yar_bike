@@ -4,10 +4,10 @@ import 'package:bike/screens/check_screen.dart';
 import 'package:bike/screens/language_selector_screen.dart';
 import 'package:bike/screens/others/bike_details_screen.dart';
 import 'package:bike/screens/onboarding_screen.dart';
-import 'package:bike/screens/others/invite_friend_screen.dart';
+import 'package:bike/screens/others/news_screen.dart';
 import 'package:bike/screens/main_screen.dart';
 import 'package:bike/screens/others/profile_screen.dart';
-import 'package:bike/screens/map/qr_scan_screen.dart';
+import 'package:bike/screens/others/qr_scan_screen.dart';
 import 'package:bike/screens/others/send_request_screen.dart';
 import 'package:bike/screens/settings/settings_screen.dart';
 import 'package:bike/screens/splash/spalsh_screen.dart';
@@ -26,7 +26,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String wallet = '/wallet';
   static const String travelReports = '/travel-reports';
-  static const String inviteFriends = '/invite-friends';
+  static const String newsScreen = '/invite-friends';
   static const String support = '/support';
   static const String settings = '/settings';
   static const String topUp = '/top-up';
@@ -78,7 +78,7 @@ class AppRoutes {
       transition: Transition.fadeIn,
     ),
     GetPage(
-      name: inviteFriends,
+      name: newsScreen,
       page: () => const NewsScreen(),
       transition: Transition.fadeIn,
     ),

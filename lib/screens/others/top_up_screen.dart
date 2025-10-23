@@ -40,20 +40,10 @@ class _TopUpScreenState extends State<TopUpScreen> {
         child: Column(
           children: [
             Container(
-              alignment: Alignment.bottomRight,
               padding: const EdgeInsets.only(bottom: 20),
-              height: 130,
+              height: 100,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    'افزایش موجودی',
-                    style: TextStyle(
-                      color: _theme.colorScheme.onPrimary,
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                   IconButton(
                     onPressed: () {
                       Get.back();
@@ -61,6 +51,14 @@ class _TopUpScreenState extends State<TopUpScreen> {
                     icon: Icon(
                       LucideIcons.arrow_right,
                       color: _theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                  Text(
+                    'افزایش موجودی',
+                    style: TextStyle(
+                      color: _theme.colorScheme.onPrimary,
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],

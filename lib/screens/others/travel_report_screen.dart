@@ -75,20 +75,10 @@ class TravelReportsScreen extends StatelessWidget {
           children: [
             // 🔹 هدر بالای صفحه
             Container(
-              height: 110,
-              alignment: Alignment.bottomRight,
+              height: 100,
               padding: const EdgeInsets.only(bottom: 10),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    'گزارش سفر ها',
-                    style: TextStyle(
-                      color: _theme.colorScheme.onPrimary,
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                   IconButton(
                     onPressed: () {
                       Get.back();
@@ -98,15 +88,23 @@ class TravelReportsScreen extends StatelessWidget {
                       color: _theme.colorScheme.onPrimary,
                     ),
                   ),
+                  Text(
+                    'گزارش سفر ها',
+                    style: TextStyle(
+                      color: _theme.colorScheme.onPrimary,
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ),
-      
+
             // 🔹 لایه سفید پایین
             Expanded(
               child: Container(
                 width: Get.width,
-      
+
                 decoration: BoxDecoration(
                   color: _theme.colorScheme.surface,
                   borderRadius: const BorderRadius.only(

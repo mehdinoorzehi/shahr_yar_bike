@@ -19,63 +19,62 @@ class IOSGuideScreen extends StatelessWidget {
     // }
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-
-            // 🔹 لوگو بالای صفحه
-            Image.asset('assets/img/logo4.png', width: 200),
-
-            const SizedBox(height: 24),
-
-            // 🔹 توضیح بالایی
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                'وب‌اپلیکیشن شهریار را به صفحه اصلی تلفن همراه خود اضافه کنید',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 1.5,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+      body: Column(
+        children: [
+          const SizedBox(height: 40),
+      
+          // 🔹 لوگو بالای صفحه
+          Image.asset('assets/img/logo4.png', width: 200),
+      
+          const SizedBox(height: 24),
+      
+          // 🔹 توضیح بالایی
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'وب‌اپلیکیشن شهریار را به صفحه اصلی تلفن همراه خود اضافه کنید',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.5,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+      
+          const SizedBox(height: 50),
+      
+          // 🔹 ستون مراحل
+          const Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                _StepItem(
+                  icon: Icons.ios_share,
+                  title: 'Share',
+                  subtitle: 'انتخاب این گزینه از نوار پایین',
                 ),
-              ),
+                SizedBox(height: 40),
+                _StepItem(
+                  icon: Icons.add,
+                  title: 'Add to Home Screen',
+                  subtitle: 'انتخاب این گزینه از منوی ظاهر شده',
+                ),
+                SizedBox(height: 40),
+                _StepItem(
+                  isAppLogo: true,
+                  title: 'Add',
+                  subtitle: 'زدن این گزینه',
+                ),
+              ],
             ),
-
-            const SizedBox(height: 50),
-
-            // 🔹 ستون مراحل
-            const Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  _StepItem(
-                    icon: Icons.ios_share,
-                    title: 'Share',
-                    subtitle: 'انتخاب این گزینه از نوار پایین',
-                  ),
-                  SizedBox(height: 40),
-                  _StepItem(
-                    icon: Icons.add,
-                    title: 'Add to Home Screen',
-                    subtitle: 'انتخاب این گزینه از منوی ظاهر شده',
-                  ),
-                  SizedBox(height: 40),
-                  _StepItem(
-                    isAppLogo: true,
-                    title: 'Add',
-                    subtitle: 'زدن این گزینه',
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 50),
-          ],
-        ),
+          ),
+      
+          const SizedBox(height: 50),
+        ],
       ),
     );
   }

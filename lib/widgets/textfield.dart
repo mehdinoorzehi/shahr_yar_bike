@@ -16,6 +16,7 @@ class MyTextFeild extends StatefulWidget {
   final bool readOnly;
   final bool enableValidation;
   final String? Function(String value)? validator;
+  final Color? hintColor;
 
   const MyTextFeild({
     super.key,
@@ -33,6 +34,7 @@ class MyTextFeild extends StatefulWidget {
     this.readOnly = false,
     this.enableValidation = false,
     this.validator,
+    this.hintColor,
   });
 
   @override
@@ -232,7 +234,9 @@ class _MyTextFeildState extends State<MyTextFeild>
                       fontFamily: '',
                       fontSize: 19,
                       fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.5),
+                      color:
+                          widget.hintColor ??
+                          theme.colorScheme.onPrimary.withValues(alpha: 0.5),
                     ),
                     suffixIcon: widget.prefixIcon,
                     counterText: '',

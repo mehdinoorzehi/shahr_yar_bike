@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="fa">
 
 <head>
   <base href="$FLUTTER_BASE_HREF">
@@ -31,7 +30,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: transparent; 
+      background-color: transparent;
       direction: rtl;
     }
 
@@ -151,6 +150,29 @@
       opacity: 0;
       transition: opacity 0.7s ease-out;
     }
+
+    /* 🪄 اضافه شد: فید برای ورود فلاتر */
+    #flutter-container {
+      opacity: 0;
+      transition: opacity 1.4s ease-out;
+    }
+
+    #flutter-container.visible {
+      opacity: 1;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+    #flutter-container {
+      position: fixed;
+      inset: 0;
+    }
   </style>
 </head>
 
@@ -164,8 +186,11 @@
     <div class="loading-bar"></div>
   </div>
 
-  <script src="pwa.js"></script>
-  <script src="flutter_bootstrap.js" defer></script>
+  <!-- Flutter -->
+  <div id="flutter-container">
+    <script src="pwa.js"></script>
+    <script src="flutter_bootstrap.js" defer></script>
+  </div>
 
   <script>
     /* 🎨 Animated gradient background */
@@ -232,11 +257,18 @@
     /* 🕓 Remove splash after Flutter ready */
     window.addEventListener('flutter-first-frame', () => {
       const splash = document.getElementById('splash');
+      const flutterContainer = document.getElementById('flutter-container');
+
       splash.classList.add('fade-out');
-      setTimeout(() => splash.remove(), 700);
+
+      // ✅ بعد از محو شدن اسپلش، فلاتر با فید نمایش داده شود
+      setTimeout(() => {
+        splash.remove();
+        flutterContainer.classList.add('visible');
+      }, 700);
     });
 
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
+    navigator.serviceWorker?.addEventListener('controllerchange', () => {
       window.location.reload();
     });
   </script>

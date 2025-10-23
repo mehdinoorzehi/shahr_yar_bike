@@ -127,7 +127,7 @@ class MyDrawer extends StatelessWidget {
                       _drawerItem(
                         icon: LucideIcons.newspaper,
                         text: 'اخبار و اطلاع رسانی',
-                        onTap: () => Get.toNamed(AppRoutes.inviteFriends),
+                        onTap: () => Get.toNamed(AppRoutes.newsScreen),
                         context: context,
                       ),
                       _drawerItem(

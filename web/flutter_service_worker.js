@@ -7,7 +7,7 @@ const VERSION_URL = 'version.json';
 let CURRENT_VERSION = null;
 let CACHE_NAME = CACHE_NAME_BASE;
 
-// لیست فایل‌هایی که باید کش بشن (در حالت دلخواه می‌تونی بیشترشون رو اضافه کنی)
+// لیست فایل‌هایی که باید کش بشن
 const CORE = [
   "index.html",
   "main.dart.js",
@@ -90,7 +90,17 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+          try {
+            caches.open(CACHE_NAME).then((cache) => {
+              try {
+                cache.put(event.request, response.clone());
+              } catch (e) {
+                // 🔇 خطای clone نادیده گرفته می‌شود
+              }
+            });
+          } catch (e) {
+            // 🔇 خطای cache یا clone نادیده گرفته می‌شود
+          }
           return response;
         })
         .catch(() => caches.match(event.request))
@@ -102,7 +112,17 @@ self.addEventListener("fetch", (event) => {
     caches.match(event.request).then((response) =>
       response ||
       fetch(event.request).then((resp) => {
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resp.clone()));
+        try {
+          caches.open(CACHE_NAME).then((cache) => {
+            try {
+              cache.put(event.request, resp.clone());
+            } catch (e) {
+              // 🔇 خطای clone نادیده گرفته می‌شود
+            }
+          });
+        } catch (e) {
+          // 🔇 خطای cache نادیده گرفته می‌شود
+        }
         return resp;
       })
     )

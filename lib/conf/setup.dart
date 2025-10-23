@@ -19,12 +19,14 @@ Future<void> setUp() async {
   // PWAInstall().setup(installCallback: () {
   //   debugPrint('APP INSTALLED!');
   // });
-  //! change status bar color
-
+  // ✅ تمام سیستم UI overlays رو شفاف و هم‌سطح محتوا کن
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      // statusBarIconBrightness: Brightness.light,
+      statusBarColor: Colors.transparent, // نوار وضعیت شفاف
+      systemNavigationBarColor: Colors.transparent, // نوار پایین شفاف
+      statusBarIconBrightness: Brightness.light, // آیکون‌های سفید
+      systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
   //

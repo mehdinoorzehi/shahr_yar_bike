@@ -78,7 +78,7 @@ class _StationCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -91,11 +91,12 @@ class _StationCard extends StatelessWidget {
           children: [
             // تصویر
             Center(
-              child: Image.asset(
-                'assets/img/Bitmap.png',
+              child: FadeInImage(
+                placeholder: const AssetImage('assets/img/loading.gif'),
+                image: const AssetImage('assets/img/Bitmap.png'),
                 width: 200,
                 height: 140,
-                fit: BoxFit.contain,
+                imageErrorBuilder: (_, __, ___) => const Icon(Icons.cloud),
               ),
             ),
             const SizedBox(height: 10),
@@ -132,7 +133,7 @@ class _StationCard extends StatelessWidget {
               'تعداد دوچرخه: ۲',
               textDirection: TextDirection.rtl,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha:  0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 4),
@@ -140,7 +141,7 @@ class _StationCard extends StatelessWidget {
               'جای پارک: ۴',
               textDirection: TextDirection.rtl,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha:0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ],

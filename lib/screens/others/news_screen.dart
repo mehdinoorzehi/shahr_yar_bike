@@ -24,69 +24,62 @@ class NewsScreen extends StatelessWidget {
             ],
           ),
         ),
-        child: Stack(
+        child: Column(
           children: [
-            Column(
-              children: [
-                Container(
-                  alignment: Alignment.bottomRight,
-                  padding: const EdgeInsets.only(bottom: 80),
-                  height: 200,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        'اخبار و اطلاع رسانی',
-                        style: TextStyle(
-                          color: _theme.colorScheme.onPrimary,
-                          fontSize: 23,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        icon: Icon(
-                          LucideIcons.arrow_right,
-                          color: _theme.colorScheme.onPrimary,
-                        ),
-                      ),
-                    ],
+            Container(
+              padding: const EdgeInsets.only(bottom: 10),
+              height: 100,
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    icon: Icon(
+                      LucideIcons.arrow_right,
+                      color: _theme.colorScheme.onPrimary,
+                    ),
                   ),
-                ),
-                // Expanded(
-                //   child: Container(
-                //     width: Get.width,
-                //     decoration: BoxDecoration(
-                //       borderRadius: const BorderRadius.only(
-                //         topLeft: Radius.circular(50),
-                //         topRight: Radius.circular(50),
-                //       ),
-                //       color: _theme.colorScheme.surface,
-                //     ),
-                //     child: SingleChildScrollView(
-                //       physics: const BouncingScrollPhysics(),
-                //       child: Padding(
-                //         padding: const EdgeInsets.symmetric(
-                //           horizontal: 10,
-                //           vertical: 30,
-                //         ),
-                //         child: Column(
-                //           children: [
-                //             const SizedBox(height: 350),
-                //             MyButton(buttonText: 'اشتراک گذاری', onTap: () {}),
-                //             const SizedBox(height: 10),
-                //             MyButton(buttonText: 'مخاطبین', onTap: () {}),
-                //           ],
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-                // ),
-              ],
+                  Text(
+                    'اخبار و اطلاع رسانی',
+                    style: TextStyle(
+                      color: _theme.colorScheme.onPrimary,
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            // _InviteCard(theme: _theme),
+            // Expanded(
+            //   child: Container(
+            //     width: Get.width,
+            //     decoration: BoxDecoration(
+            //       borderRadius: const BorderRadius.only(
+            //         topLeft: Radius.circular(50),
+            //         topRight: Radius.circular(50),
+            //       ),
+            //       color: _theme.colorScheme.surface,
+            //     ),
+            //     child: SingleChildScrollView(
+            //       physics: const BouncingScrollPhysics(),
+            //       child: Padding(
+            //         padding: const EdgeInsets.symmetric(
+            //           horizontal: 10,
+            //           vertical: 30,
+            //         ),
+            //         child: Column(
+            //           children: [
+            //             const SizedBox(height: 350),
+            //             MyButton(buttonText: 'اشتراک گذاری', onTap: () {}),
+            //             const SizedBox(height: 10),
+            //             MyButton(buttonText: 'مخاطبین', onTap: () {}),
+            //           ],
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

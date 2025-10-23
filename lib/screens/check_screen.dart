@@ -174,6 +174,7 @@ class _CheckScreenState extends State<CheckScreen> {
 
     return AnimatedBackground(
       child: Scaffold(
+        extendBodyBehindAppBar: true,
         backgroundColor: Colors.transparent,
         body: Center(
           child: SingleChildScrollView(

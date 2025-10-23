@@ -32,20 +32,10 @@ class Walletscreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              alignment: Alignment.bottomRight,
               padding: const EdgeInsets.only(bottom: 10),
-              height: 110,
+              height: 100,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    'کیف پول من',
-                    style: TextStyle(
-                      color: _theme.colorScheme.onPrimary,
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                   IconButton(
                     onPressed: () {
                       Get.back();
@@ -53,6 +43,14 @@ class Walletscreen extends StatelessWidget {
                     icon: Icon(
                       LucideIcons.arrow_right,
                       color: _theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                  Text(
+                    'کیف پول من',
+                    style: TextStyle(
+                      color: _theme.colorScheme.onPrimary,
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],

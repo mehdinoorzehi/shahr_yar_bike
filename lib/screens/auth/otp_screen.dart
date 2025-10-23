@@ -22,117 +22,122 @@ class OtpScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final authController = Get.find<AuthenticationController>();
 
-    // 🔹 بررسی: اگر شماره پاک شده (مثلاً بعد از refresh)
+    // 🔹 اگر شماره خالی باشد
     if (authController.phoneController.text.isEmpty) {
       return Scaffold(
-        body: SafeArea(
-          child: AnimatedBackground(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.warning_amber_rounded,
-                    color: Colors.amber,
-                    size: 60,
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'برای ادامه، لطفاً دوباره وارد شوید',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                  const SizedBox(height: 20),
-                  MyButton(
-                    buttonText: 'بازگشت به ورود',
-                    onTap: () => Get.toNamed(AppRoutes.login),
-                  ),
-                ],
-              ),
+        extendBodyBehindAppBar: true,
+        resizeToAvoidBottomInset: false,
+        body: AnimatedBackground(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.amber,
+                  size: 60,
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'برای ادامه، لطفاً دوباره وارد شوید',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                MyButton(
+                  buttonText: 'بازگشت به ورود',
+                  onTap: () => Get.toNamed(AppRoutes.login),
+                ),
+              ],
             ),
           ),
         ),
       );
     }
 
-    // 🔹 حالت خاص: نمایش کد برای ارسال توسط کاربر
-
+    // 🔹 حالت خاص: ارسال دستی کد
     if (authController.selectedMethod.value == 'sms_from_user') {
       return Scaffold(
-        body: SafeArea(
-          child: AnimatedBackground(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      LucideIcons.smartphone,
-                      color: Colors.white,
-                      size: 80,
-                    ),
-                    const SizedBox(height: 30),
+        extendBodyBehindAppBar: true,
 
-                    // ✅ متن اول (provider_number)
-                    GestureDetector(
-                      onTap: () {
-                        Clipboard.setData(
-                          ClipboardData(
-                            text: authController.providerNumber.value,
-                          ),
-                        );
-                        showCopiedMessage("شماره کپی شد ✅");
-                      },
-                      child: Text(
-                        'verification_code_display'.trNamed({
-                          'provider_number':
-                              authController.providerNumber.value,
-                        }),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
+        resizeToAvoidBottomInset: false,
+        body: AnimatedBackground(
+          child: Center(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.only(
+                left: 32,
+                right: 32,
+                top: 32,
+                bottom:
+                    MediaQuery.of(context).viewInsets.bottom +
+                    40, // ✅ اسکرول پشت کیبورد
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    LucideIcons.smartphone,
+                    color: Colors.white,
+                    size: 80,
+                  ),
+                  const SizedBox(height: 30),
+
+                  GestureDetector(
+                    onTap: () {
+                      Clipboard.setData(
+                        ClipboardData(
+                          text: authController.providerNumber.value,
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // ✅ متن دوم (userCode)
-                    GestureDetector(
-                      onTap: () {
-                        Clipboard.setData(
-                          ClipboardData(text: authController.userCode.value),
-                        );
-                        showCopiedMessage("کد کپی شد ✅");
-                      },
-                      child: Text(
-                        authController.userCode.value,
-                        style: const TextStyle(
-                          fontSize: 42,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amber,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-                    Text(
-                      "after_sending_code_press_check".tr,
+                      );
+                      showCopiedMessage("شماره کپی شد");
+                    },
+                    child: Text(
+                      'verification_code_display'.trNamed({
+                        'provider_number': authController.providerNumber.value,
+                      }),
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 20),
-                    MyButton(
-                      isFocus: true,
-                      buttonText: "check".tr,
-                      onTap: () => Get.offAllNamed(AppRoutes.home),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  GestureDetector(
+                    onTap: () {
+                      Clipboard.setData(
+                        ClipboardData(text: authController.userCode.value),
+                      );
+                      showCopiedMessage("کد کپی شد");
+                    },
+                    child: Text(
+                      authController.userCode.value,
+                      style: const TextStyle(
+                        fontSize: 42,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber,
+                      ),
                     ),
-                    const SizedBox(height: 60),
-                    _buildTipsSection(theme),
-                  ],
-                ),
+                  ),
+
+                  const SizedBox(height: 40),
+                  Text(
+                    "after_sending_code_press_check".tr,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  MyButton(
+                    isFocus: true,
+                    buttonText: "check".tr,
+                    onTap: () => Get.offAllNamed(AppRoutes.home),
+                  ),
+                  const SizedBox(height: 60),
+                  _buildTipsSection(theme),
+                ],
               ),
             ),
           ),
@@ -140,208 +145,190 @@ class OtpScreen extends StatelessWidget {
       );
     }
 
-    // 🔹 حالت عادی (OTP Code Input)
+    // 🔹 حالت عادی (OTP Input)
     return Scaffold(
-      body: SafeArea(
-        child: AnimatedBackground(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
-                children: [
-                  // 🔹 عنوان صفحه
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 24,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        'sms_code'.tr,
-                        style: TextStyle(
-                          color: theme.colorScheme.onPrimary,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+      extendBodyBehindAppBar: true,
+
+      resizeToAvoidBottomInset: false, // ✅ صفحه بالا نره
+      body: AnimatedBackground(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Column(
+              children: [
+                // 🔹 عنوان
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 24,
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      'sms_code'.tr,
+                      style: TextStyle(
+                        color: theme.colorScheme.onPrimary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
+                ),
 
-                  // 🔹 محتوای اصلی (قابل اسکرول)
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(40),
-                          topRight: Radius.circular(40),
-                        ),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          width: 1.2,
-                        ),
+                // 🔹 محتوای اصلی
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(40),
+                        topRight: Radius.circular(40),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(28, 36, 28, 20),
-                        child: Column(
-                          children: [
-                            // 🔹 بخش اسکرول‌پذیر بالای فرم
-                            Expanded(
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Center(
-                                      child: Text(
-                                        'verification_code_sent'.trNamed({
-                                          'number': authController
-                                              .phoneController
-                                              .text,
-                                        }),
-                                        textAlign: TextAlign.center,
-                                        style: theme.textTheme.titleSmall
-                                            ?.apply(
-                                              color:
-                                                  theme.colorScheme.onPrimary,
-                                              fontSizeFactor: 1.1,
-                                            ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 30),
-
-                                    // 🔹 فیلد کد
-                                    Center(
-                                      child: SizedBox(
-                                        width: 200,
-                                        child: MyTextFeild(
-                                          controller:
-                                              authController.otpController,
-                                          maxLength: 6,
-                                          textDirection: TextDirection.ltr,
-                                          keyboardType: TextInputType.number,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 35),
-
-                                    // 🔹 دکمه‌های ویرایش و ارسال مجدد
-                                    Wrap(
-                                      spacing: 12,
-                                      runSpacing: 12,
-                                      alignment: WrapAlignment.center,
-                                      children: [
-                                        _GlassButton(
-                                          icon: LucideIcons.pencil,
-                                          label: "edit_number".tr,
-                                          onTap: () => Get.back(),
-                                          themeData: theme,
-                                        ),
-                                        Obx(
-                                          () => ResendCodeButton(
-                                            seconds: authController
-                                                .remainingTime
-                                                .value,
-                                            onResend: () async {
-                                              showWarningToast(
-                                                description:
-                                                    'شماره موبایل وارد شده نادرست است',
-                                              );
-                                              await authController
-                                                  .requestVerification();
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 60),
-
-                                    // 🔹 دکمه ادامه
-                                    Obx(
-                                      () => MyButton(
-                                        isLoading:
-                                            authController.isLoadingOtp.value,
-                                        isFocus: true,
-                                        buttonText: 'continue_btn'.tr,
-                                        onTap: () async {
-                                          await authController.verifyCode();
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.25),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.only(
+                        left: 28,
+                        right: 28,
+                        top: 36,
+                        bottom:
+                            MediaQuery.of(context).viewInsets.bottom +
+                            40, // ✅ اسکرول پشت کیبورد
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Center(
+                            child: Text(
+                              'verification_code_sent'.trNamed({
+                                'number': authController.phoneController.text,
+                              }),
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.titleSmall?.apply(
+                                color: theme.colorScheme.onPrimary,
+                                fontSizeFactor: 1.1,
                               ),
                             ),
+                          ),
+                          const SizedBox(height: 30),
 
-                            // 🔹 نکات پایین (ثابت مثل لاگین)
-                            _buildTipsSection(theme),
-                          ],
-                        ),
+                          // 🔹 فیلد کد
+                          Center(
+                            child: SizedBox(
+                              width: 200,
+                              child: MyTextFeild(
+                                controller: authController.otpController,
+                                maxLength: 6,
+                                textDirection: TextDirection.ltr,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 35),
+
+                          // 🔹 دکمه‌های ویرایش و ارسال مجدد
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              _GlassButton(
+                                icon: LucideIcons.pencil,
+                                label: "edit_number".tr,
+                                onTap: () => Get.back(),
+                                themeData: theme,
+                              ),
+                              Obx(
+                                () => ResendCodeButton(
+                                  seconds: authController.remainingTime.value,
+                                  onResend: () async {
+                                    showWarningToast(
+                                      description:
+                                          'شماره موبایل وارد شده نادرست است',
+                                    );
+                                    await authController.requestVerification();
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 60),
+
+                          // 🔹 دکمه ادامه
+                          Obx(
+                            () => MyButton(
+                              isLoading: authController.isLoadingOtp.value,
+                              isFocus: true,
+                              buttonText: 'continue_btn'.tr,
+                              onTap: () async {
+                                await authController.verifyCode();
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                          _buildTipsSection(theme),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
-
-  Widget _buildTipsSection(ThemeData theme) {
-    final tips = _buildOtpTips(theme);
-    return Column(
-      children: [
-        Divider(color: theme.colorScheme.onPrimary.withValues(alpha: 0.3)),
-        const SizedBox(height: 16),
-        ...tips,
-      ],
-    );
-  }
 }
 
-Widget buildTip(String text, ThemeData themeData) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Row(
-      // crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          LucideIcons.circle_check,
-          color: themeData.colorScheme.onPrimary.withValues(alpha: 0.8),
-          size: 18,
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            // textDirection: TextDirection.rtl,
-            style: themeData.textTheme.bodyMedium?.copyWith(
-              color: themeData.colorScheme.onPrimary.withValues(alpha: 0.8),
-              height: 1.5,
-              fontSize: 13.5,
+// 🔹 بخش نکات پایین
+Widget _buildTipsSection(ThemeData theme) {
+  final tips = <Widget>[];
+  int i = 1;
+  while (true) {
+    final key = 'login_verify_help_$i';
+    final text = key.tr;
+    if (text.isEmpty || text == key) break;
+    tips.add(
+      Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          children: [
+            Icon(
+              LucideIcons.circle_check,
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+              size: 18,
             ),
-          ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                text,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+                  height: 1.5,
+                  fontSize: 13.5,
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
+      ),
+    );
+    i++;
+  }
+  return Column(
+    children: [
+      const SizedBox(height: 100),
+      Divider(color: theme.colorScheme.onPrimary.withValues(alpha: 0.3)),
+      const SizedBox(height: 16),
+      ...tips,
+    ],
   );
 }
-
-// List<Widget> _buildOtpTips(ThemeData themeData) {
-//   final tips = <Widget>[];
-//   int index = 1;
-//   while (true) {
-//     final key = 'otp_help_$index';
-//     final text = key.tr;
-//     if (text.isEmpty || text == key) break;
-//     tips.add(buildTip(text, themeData));
-//     index++;
-//   }
-//   return tips;
-// }
 
 class _GlassButton extends StatelessWidget {
   final IconData? icon; // ✅ قابل null شدن
@@ -401,26 +388,6 @@ class _GlassButton extends StatelessWidget {
       ),
     );
   }
-}
-
-List<Widget> _buildOtpTips(ThemeData themeData) {
-  List<Widget> tips = [];
-  int index = 1;
-
-  while (true) {
-    final key = 'login_verify_help_$index';
-    final text = key.tr;
-
-    // اگر کلید خالی یا برابر کلید خودش بود یعنی ترجمه وجود نداره → توقف
-    if (text.isEmpty || text == key) break;
-
-    tips.add(buildTip(text, themeData));
-    tips.add(const SizedBox(height: 8));
-
-    index++;
-  }
-
-  return tips;
 }
 
 class ResendCodeButton extends StatefulWidget {

@@ -33,20 +33,10 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              height: 110,
-              alignment: Alignment.bottomRight,
+              height: 100,
               padding: const EdgeInsets.only(bottom: 10),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    'تنظیمات',
-                    style: TextStyle(
-                      color: _theme.colorScheme.onPrimary,
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                   IconButton(
                     onPressed: () {
                       Get.back();
@@ -54,6 +44,14 @@ class SettingsScreen extends StatelessWidget {
                     icon: Icon(
                       LucideIcons.arrow_right,
                       color: _theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                  Text(
+                    'تنظیمات',
+                    style: TextStyle(
+                      color: _theme.colorScheme.onPrimary,
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],

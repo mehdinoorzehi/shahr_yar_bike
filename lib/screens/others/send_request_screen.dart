@@ -29,20 +29,10 @@ class SendRequestScreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              alignment: Alignment.bottomRight,
               padding: const EdgeInsets.only(bottom: 10),
-              height: 110,
+              height: 100,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    'ارسال درخواست',
-                    style: TextStyle(
-                      color: _theme.colorScheme.onPrimary,
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                   IconButton(
                     onPressed: () {
                       Get.back();
@@ -50,6 +40,14 @@ class SendRequestScreen extends StatelessWidget {
                     icon: Icon(
                       LucideIcons.arrow_right,
                       color: _theme.colorScheme.onPrimary,
+                    ),
+                  ),
+                  Text(
+                    'ارسال درخواست',
+                    style: TextStyle(
+                      color: _theme.colorScheme.onPrimary,
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
@@ -77,6 +75,7 @@ class SendRequestScreen extends StatelessWidget {
                         const MyTextFeild(
                           suffixIcon: Icon(LucideIcons.user),
                           hintText: 'نام',
+                          hintColor: Colors.grey,
                           hintTextDirection: TextDirection.rtl,
                         ),
                         const SizedBox(height: 20),
@@ -86,6 +85,7 @@ class SendRequestScreen extends StatelessWidget {
                           hintText: 'شماره تماس',
                           hintTextDirection: TextDirection.rtl,
                           textDirection: TextDirection.ltr,
+                          hintColor: Colors.grey,
                         ),
                         const SizedBox(height: 20),
 
@@ -93,6 +93,7 @@ class SendRequestScreen extends StatelessWidget {
                           suffixIcon: Icon(LucideIcons.mail),
                           hintText: 'متن درخواست',
                           hintTextDirection: TextDirection.rtl,
+                          hintColor: Colors.grey,
                         ),
 
                         const SizedBox(height: 80),

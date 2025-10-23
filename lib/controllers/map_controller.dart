@@ -77,22 +77,23 @@ class MapControllerX extends GetxController {
 
       // ---------- Debounced location stream ----------
       _positionStreamSub?.cancel();
-      _positionStreamSub = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.best,
-          distanceFilter: 10,
-        ),
-      )
-          .debounceTime(const Duration(milliseconds: 300))
-          .listen(
-        (position) {
-          currentPosition.value = position;
-          _recalculateDistances();
-        },
-        onError: (e) {
-          debugPrint("❌ خطا در استریم موقعیت: $e");
-        },
-      );
+      _positionStreamSub =
+          Geolocator.getPositionStream(
+                locationSettings: const LocationSettings(
+                  accuracy: LocationAccuracy.best,
+                  distanceFilter: 10,
+                ),
+              )
+              .debounceTime(const Duration(milliseconds: 300))
+              .listen(
+                (position) {
+                  currentPosition.value = position;
+                  _recalculateDistances();
+                },
+                onError: (e) {
+                  debugPrint("❌ خطا در استریم موقعیت: $e");
+                },
+              );
     } catch (e) {
       debugPrint("❌ خطا در initLocation: $e");
     } finally {
@@ -149,8 +150,7 @@ class MapControllerX extends GetxController {
       final dMeters = distance(userLatLng, LatLng(s.lat, s.lng));
       s.distanceKm = (dMeters / 1000);
       return s;
-    }).toList()
-      ..sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
+    }).toList()..sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
 
     stations.assignAll(updated);
     updateMarkers();

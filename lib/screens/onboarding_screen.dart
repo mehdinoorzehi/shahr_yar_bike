@@ -14,6 +14,8 @@ class OnBoardingScreen extends StatelessWidget {
 
     return AnimatedBackground(
       child: Scaffold(
+                extendBodyBehindAppBar: true,
+
         backgroundColor: Colors.transparent,
         body: Obx(() {
           // اگر پاسخی نیامده یا مشکلی بود

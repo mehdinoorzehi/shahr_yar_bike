@@ -1,11 +1,9 @@
-import 'dart:ui';
-import 'package:bike/controllers/main_controller.dart';
 import 'package:bike/screens/others/near_station_cards.dart';
+import 'package:bike/widgets/animated_touch.dart';
 import 'package:bike/widgets/drawer_avatar.dart';
 import 'package:bike/widgets/my_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:get/get.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -14,205 +12,170 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SafeArea(
-      child: Scaffold(
-        drawer: const MyDrawer(),
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+    return Scaffold(
+      drawer: const MyDrawer(),
+      body: Stack(
+        children: [
+          // 🔹 فقط یک‌بار گرادینت برای کل پس‌زمینه رندر میشه
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  theme.colorScheme.primary,
+                  theme.colorScheme.secondary,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
           ),
-          child: CustomScrollView(
+
+          // 🔹 محتوای اسکرول‌پذیر
+          SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            cacheExtent: 1000,
-            slivers: [
-              // ====== HEADER ======
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 10,
-                  ),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Scaffold.of(context).openDrawer(),
-                        child: Icon(
-                          LucideIcons.menu,
-                          color: theme.colorScheme.onPrimary,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () => Scaffold.of(context).openDrawer(),
-                        child: Text(
-                          'سلام مهدی',
-                          style: theme.textTheme.titleLarge!.copyWith(
-                            color: theme.colorScheme.onPrimary,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      const DrawerAvatar(),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-              // ====== WEATHER CARD ======
-              SliverToBoxAdapter(
-                child: RepaintBoundary(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: _WeatherCard(theme: theme),
-                  ),
-                ),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-              // ====== MINI CARDS ======
-              SliverToBoxAdapter(
-                child: RepaintBoundary(
-                  child: SizedBox(
-                    height: 110,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      children: const [
-                        _MiniCard(icon: LucideIcons.bike, title: "دوچرخه"),
-                        _MiniCard(icon: LucideIcons.smile, title: "اسکوتر"),
-                        _MiniCard(icon: LucideIcons.bike, title: "دوچرخه برقی"),
-                        _MiniCard(
-                          icon: LucideIcons.circle_parking,
-                          title: "پارکینگ",
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-              // ====== CURRENT TRIP CARD ======
-              SliverToBoxAdapter(
-                child: RepaintBoundary(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: _TripCard(theme: theme),
-                  ),
-                ),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-              // ====== TITLE + NEAR STATIONS ======
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Row(
-                    children: [
-                      Text(
-                        'پیشنهادات',
-                        style: theme.textTheme.titleMedium!.copyWith(
-                          color: theme.colorScheme.onPrimary,
-                        ),
-                      ),
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: () {
-                          final controller = Get.find<MainController>();
-                          controller.selectedIndex.value = 1; // تب نقشه
-                        },
-                        child: Text(
-                          'جستجو در نقشه',
-                          style: theme.textTheme.titleMedium!.copyWith(
-                            color: theme.colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 10)),
-
-              const SliverToBoxAdapter(
-                child: RepaintBoundary(child: NearStationCards()),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            ],
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Header(theme: theme),
+                const SizedBox(height: 25),
+                _WeatherCard(theme: theme),
+                const SizedBox(height: 25),
+                _MiniCardRow(theme: theme),
+                const SizedBox(height: 25),
+                _TripCard(theme: theme),
+                const SizedBox(height: 30),
+                _SuggestionsHeader(theme: theme),
+                const SizedBox(height: 10),
+                const NearStationCards(),
+                const SizedBox(height: 50),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
+// ===================== 🔹 HEADER =====================
+class _Header extends StatelessWidget {
+  final ThemeData theme;
+  const _Header({required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Row(
+        children: [
+          Builder(
+            builder: (context) {
+              return AnimatedTouch(
+                onTap: () => Scaffold.of(context).openDrawer(),
+                child: Icon(
+                  LucideIcons.menu,
+                  color: theme.colorScheme.onPrimary,
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 10),
+          Text(
+            'سلام مهدی 👋',
+            style: theme.textTheme.titleLarge!.copyWith(
+              color: theme.colorScheme.onPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const Spacer(),
+          const DrawerAvatar(),
+        ],
+      ),
+    );
+  }
+}
+
+// ===================== 🔹 WEATHER CARD =====================
 class _WeatherCard extends StatelessWidget {
   final ThemeData theme;
   const _WeatherCard({required this.theme});
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: ImageFiltered(
-        imageFilter: ImageFilter.blur(
-          sigmaX: 2,
-          sigmaY: 2,
-        ), // سبک‌تر از BackdropFilter
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.onPrimary.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.25),
-              width: 1,
-            ),
-          ),
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '12°',
-                    style: theme.textTheme.titleLarge!.copyWith(
-                      color: theme.colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'اصفهان',
-                    style: theme.textTheme.bodyLarge!.copyWith(
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                  ),
-                  Text(
-                    'چهارشنبه، 17 دی',
-                    style: theme.textTheme.bodyMedium!.copyWith(
-                      color: theme.colorScheme.onPrimary.withValues(alpha: 0.9),
-                    ),
-                  ),
-                ],
-              ),
-              Image.asset('assets/img/cloudly.png', width: 80, height: 65),
-            ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.2),
+            width: 1,
           ),
         ),
+        padding: const EdgeInsets.all(15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '12°',
+                  style: theme.textTheme.headlineSmall!.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'اصفهان',
+                  style: theme.textTheme.bodyLarge!.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+                Text(
+                  'چهارشنبه، 17 دی',
+                  style: theme.textTheme.bodyMedium!.copyWith(
+                    color: theme.colorScheme.onPrimary.withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
+            ),
+            FadeInImage(
+              placeholder: const AssetImage('assets/img/loading.gif'),
+              image: const AssetImage('assets/img/cloudly.png'),
+              width: 80,
+              height: 65,
+              imageErrorBuilder: (_, __, ___) => const Icon(Icons.cloud),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ===================== 🔹 MINI CARDS =====================
+class _MiniCardRow extends StatelessWidget {
+  final ThemeData theme;
+  const _MiniCardRow({required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 110,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        children: const [
+          _MiniCard(icon: LucideIcons.bike, title: "دوچرخه"),
+          _MiniCard(icon: LucideIcons.smile, title: "اسکوتر"),
+          _MiniCard(icon: LucideIcons.bike, title: "دوچرخه برقی"),
+          _MiniCard(icon: LucideIcons.circle_parking, title: "پارکینگ"),
+        ],
       ),
     );
   }
@@ -230,7 +193,7 @@ class _MiniCard extends StatelessWidget {
       width: 110,
       margin: const EdgeInsets.only(right: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
+        color: Colors.white.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.25),
@@ -254,11 +217,82 @@ class _MiniCard extends StatelessWidget {
   }
 }
 
+// ===================== 🔹 TRIP CARD =====================
 class _TripCard extends StatelessWidget {
   final ThemeData theme;
   const _TripCard({required this.theme});
 
-  Widget _tripInfo(IconData icon, String label, String value) {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              theme.colorScheme.primary.withValues(alpha: 0.7),
+              theme.colorScheme.secondary.withValues(alpha: 0.9),
+            ],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+          ),
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1.2,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.bike,
+                  color: theme.colorScheme.onPrimary,
+                  size: 35,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  "سفر جاری",
+                  style: theme.textTheme.titleLarge!.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _tripInfo(theme, LucideIcons.clock, "مدت زمان", "32 دقیقه"),
+                _tripInfo(theme, LucideIcons.wallet, "هزینه", "45,000 تومان"),
+                _tripInfo(theme, LucideIcons.bike, "شماره پلاک", "22"),
+              ],
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.onPrimary,
+                foregroundColor: theme.colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              onPressed: () {},
+              icon: const Icon(LucideIcons.check),
+              label: const Text("پایان سفر"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _tripInfo(ThemeData theme, IconData icon, String label, String value) {
     return Column(
       children: [
         Icon(icon, color: theme.colorScheme.onPrimary, size: 24),
@@ -280,69 +314,25 @@ class _TripCard extends StatelessWidget {
       ],
     );
   }
+}
+
+// ===================== 🔹 SUGGESTIONS HEADER =====================
+class _SuggestionsHeader extends StatelessWidget {
+  final ThemeData theme;
+  const _SuggestionsHeader({required this.theme});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            theme.colorScheme.primary.withValues(alpha: 0.6),
-            theme.colorScheme.secondary.withValues(alpha: 0.9),
-          ],
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-        ),
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: theme.colorScheme.shadow.withValues(alpha: 0.1),
-          width: 1.2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Icon(
-                LucideIcons.bike,
-                color: theme.colorScheme.onPrimary,
-                size: 35,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                "سفر جاری",
-                style: theme.textTheme.titleLarge!.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _tripInfo(LucideIcons.clock, "مدت زمان", "32 دقیقه"),
-              _tripInfo(LucideIcons.wallet, "هزینه", "45,000 تومان"),
-              _tripInfo(LucideIcons.bike, "شماره پلاک", "22"),
-            ],
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.onPrimary,
-              foregroundColor: theme.colorScheme.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
+          Text(
+            'پیشنهادات',
+            style: theme.textTheme.titleMedium!.copyWith(
+              color: theme.colorScheme.onPrimary,
+              fontWeight: FontWeight.bold,
             ),
-            onPressed: () {},
-            icon: const Icon(LucideIcons.check),
-            label: const Text("پایان سفر"),
           ),
         ],
       ),
